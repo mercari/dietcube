@@ -1,7 +1,24 @@
-<phpunit bootstrap="./tests/bootstrap.php" stopOnFailure="false" colors="true">
+<phpunit
+    bootstrap="./tests/bootstrap.php"
+    addUncoveredFilesFromWhitelist="true"
+    processUncoveredFilesFromWhitelist="true"
+    stopOnFailure="false"
+    colors="true">
     <testsuites>
         <testsuite>
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
+    <filter>
+      <whitelist processUncoveredFilesFromWhitelist="true">
+        <directory suffix=".php">./src</directory>
+        <exclude>
+          <directory suffix=".php">./tests</directory>
+          <directory suffix=".twig">./src/template</directory>
+        </exclude>
+      </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/>
+    </logging>
 </phpunit>
