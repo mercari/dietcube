@@ -15,4 +15,5 @@ GTAGS
 *.sw[po]
 tags
 vendor/*
+build/
 composer.lock
