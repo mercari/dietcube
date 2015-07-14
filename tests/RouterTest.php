@@ -43,6 +43,26 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         $router->dispatch('GET', '/about');
     }
 
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testNotExistHandler()
+    {
+        $router = static::createRouter();
+
+        $router->url('Page::notExistsHandler');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testNotExistSegumentName()
+    {
+        $router = static::createRouter();
+
+        $router->url('User::detail', ['invalid_key_name' => 12345]);
+    }
+
     public function testGenerateUrl()
     {
         $router = static::createRouter();
