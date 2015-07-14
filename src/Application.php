@@ -60,8 +60,8 @@ abstract class Application
     {
         $server = $container['global.server']->get();
         $this->host = $server['HTTP_HOST'];
-        $this->protocol = (($this->port == '443' || (isset($server['X_FORWARDED_PROTO']) && $server['X_FORWARDED_PROTO'] == 'https')) ? 'https' : 'http');
         $this->port = $server['SERVER_PORT'];
+        $this->protocol = (($this->port == '443' || (isset($server['X_FORWARDED_PROTO']) && $server['X_FORWARDED_PROTO'] == 'https')) ? 'https' : 'http');
         $this->path = parse_url($server['REQUEST_URI'])['path'];
         $this->url = $this->protocol . '://' . $this->host;
     }
