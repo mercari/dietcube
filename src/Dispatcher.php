@@ -81,6 +81,9 @@ class Dispatcher
             'cache' => $config->get('twig.cache', null),
             'charset' => $config->get('twig.charset', 'utf-8'),
         ]);
+
+        $twig->addGlobal('query', $this->container['global.get']->getData());
+        $twig->addGlobal('body', $this->container['global.post']->getData());
         return $twig;
     }
 
