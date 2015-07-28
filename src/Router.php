@@ -17,6 +17,12 @@ class Router
 
     protected $container;
 
+    protected $route_info = null;
+
+    protected $dispatched_http_method = null;
+
+    protected $dispatched_url = null;
+
     /**
      * @var RouteInterface[]
      */
@@ -64,7 +70,11 @@ class Router
             throw new \RuntimeException('Route dispatcher is not initialized');
         }
 
-        return $this->dispatcher->dispatch($http_method, $url);
+        $this->dispatched_http_method = $http_method;
+        $this->dispatched_url = $url;
+        $this->route_info = $this->dispatcher->dispatch($http_method, $url);
+
+        return $this->route_info;
     }
 
     /**
@@ -104,6 +114,21 @@ class Router
         }
 
         return $url;
+    }
+
+    public function getRouteInfo()
+    {
+        return $this->route_info;
+    }
+
+    public function getDispatchedMethod()
+    {
+        return $this->dispatched_http_method;
+    }
+
+    public function getDispatchedUrl()
+    {
+        return $this->dispatched_url;
     }
 
     protected function buildNameIndex()

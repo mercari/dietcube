@@ -23,6 +23,10 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
         $route_info = $router->dispatch('GET', '/user/12345');
         $this->assertSame([\FastRoute\Dispatcher::FOUND, 'User::detail', ['id' => '12345']], $route_info);
+
+        $this->assertSame($route_info, $router->getRouteInfo());
+        $this->assertEquals('GET', $router->getDispatchedMethod());
+        $this->assertEquals('/user/12345', $router->getDispatchedUrl());
     }
 
     public function testDispatchPageNotFound()
