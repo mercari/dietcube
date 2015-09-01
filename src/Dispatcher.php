@@ -147,24 +147,32 @@ class Dispatcher
         return $action_result;
     }
 
-    public function executeAction($controller_name, $action_name, $vars = [])
+    public function executeAction($controller_name_or_callable, $action_name, $vars = [])
     {
         $logger = $this->container['logger'];
+        $executable = null;
+        if (is_callable($controller_name_or_callable)) {
+            $executable = $controller_name_or_callable;
+            $controller_name = 'function()';
+            $action_name = '-';
+        } else {
+            $controller_name = $controller_name_or_callable;
+            $controller = new $controller_name($this->container);
+            $controller->setVars('env', $this->container['app']->getEnv());
+            $controller->setVars('config', $this->container['app.config']->getData());
+            $executable = [$controller, $action_name];
+        }
 
-        $controller = new $controller_name($this->container);
-        $controller->setVars('env', $this->container['app']->getEnv());
-        $controller->setVars('config', $this->container['app.config']->getData());
-
-        if (!is_callable([$controller, $action_name])) {
+        if (!is_callable($executable)) {
             $logger->error('Action not dispatchable.', ['controller' => $controller_name, 'action' => $action_name]);
             throw new DCException("'{$controller_name}' doesn't have such an action '{$action_name}'");
         }
 
         $logger->debug(
-            'Dispatch action. controller={controller}::{action}({vars})',
+            'Dispatch action.',
             ['controller' => $controller_name, 'action' => $action_name, 'vars' => $vars]);
 
-        $action_result = call_user_func_array([$controller, $action_name], $vars);
+        $action_result = call_user_func_array($executable, $vars);
         return $action_result;
     }
 
@@ -234,6 +242,9 @@ EOT;
 
     protected function detectAction($handler)
     {
+        if (is_callable($handler)) {
+            return [$handler, null];
+        }
         $logger = $this->container['logger'];
 
         // @TODO check
