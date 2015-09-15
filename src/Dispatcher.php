@@ -78,7 +78,7 @@ class Dispatcher
         $loader = new \Twig_Loader_Filesystem($this->app->getTemplateDir());
         $twig = new \Twig_Environment($loader, [
             'debug' => $config->get('debug', false),
-            'cache' => $config->get('twig.cache', null),
+            'cache' => $config->get('twig.cache', false),
             'charset' => $config->get('twig.charset', 'utf-8'),
         ]);
 
