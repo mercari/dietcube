@@ -40,6 +40,15 @@ class Controller
         return $this;
     }
 
+    protected function isPost()
+    {
+        if (stripos($this->container['global.server']->get('REQUEST_METHOD'), 'post') === 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     protected function get($name)
     {
         return $this->container[$name];
