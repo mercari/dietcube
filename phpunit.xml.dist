@@ -3,7 +3,7 @@
     addUncoveredFilesFromWhitelist="true"
     processUncoveredFilesFromWhitelist="true"
     stopOnFailure="false"
-    colors="true">
+    colors="auto">
     <testsuites>
         <testsuite>
             <directory suffix="Test.php">./tests</directory>
