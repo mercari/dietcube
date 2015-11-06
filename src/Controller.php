@@ -54,6 +54,11 @@ class Controller
         return $this->container['global.post']->get($name, $default);
     }
 
+    protected function generateUrl($handler, array $data = [], array $query_params = [])
+    {
+        return $this->container['router']->url($handler, $data, $query_params);
+    }
+
     protected function findTemplate($name)
     {
         return $name . $this->get('app')->getTemplateExt();
