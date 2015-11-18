@@ -10,6 +10,7 @@ use Pimple\Container;
 use FastRoute\Dispatcher as RouteDispatcher;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use Monolog\Handler\ErrorLogHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
 class Dispatcher
@@ -57,17 +58,16 @@ class Dispatcher
 
     protected function createLogger($path, $level = Logger::WARNING)
     {
-        if (!is_file($path)) {
-            if (!touch($path)) {
-                throw new DCException("Cannot create log file: '{$path}'");
-            }
-        } elseif (!is_writable($path)) {
-            throw new DCException("Log path '{$path}' is not writable.");
-        }
-
         $logger = new Logger('app');
-        $logger->pushHandler(new StreamHandler($path, $level));
         $logger->pushProcessor(new PsrLogMessageProcessor);
+
+        if (is_writable($path) || is_writable(dirname($path))) {
+            $logger->pushHandler(new StreamHandler($path, $level));
+        } else {
+            $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level));
+            $logger->warning("Log path '{$path}' is not writable. Make sure your logger.path of config.");
+            $logger->warning("error_log() is used for application logger instead at this time.");
+        }
 
         return $logger;
     }
