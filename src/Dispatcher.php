@@ -64,6 +64,9 @@ class Dispatcher
         if (is_writable($path) || is_writable(dirname($path))) {
             $logger->pushHandler(new StreamHandler($path, $level));
         } else {
+            if ($this->app->isDebug()) {
+                throw new DCException("Log path '{$path}' is not writable. Make sure your logger.path of config.");
+            }
             $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level));
             $logger->warning("Log path '{$path}' is not writable. Make sure your logger.path of config.");
             $logger->warning("error_log() is used for application logger instead at this time.");
