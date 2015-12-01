@@ -28,7 +28,7 @@ class ArrayResourceGetterTraitTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(1, $obj->getResource('config1'));
         $this->assertTrue($obj->getResource('config_bool'));
-        $this->assertSame([1,2,3], $obj->getResource('config_array'));
+        $this->assertSame([1, 2, 3], $obj->getResource('config_array'));
         $this->assertNull($obj->getResource('config_string1'), 'non exists key');
 
         $this->assertSame(2, $obj->getResource('config2', 2), 'non-exiss key and default');
@@ -52,7 +52,8 @@ class ArrayResourceGetterTraitTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class ConcreteResource {
+class ConcreteResource
+{
     use ArrayResourceGetterTrait;
 
     public function __construct(array $array = [])
