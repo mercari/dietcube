@@ -19,6 +19,11 @@ abstract class Application
     protected $debug = false;
 
     /**
+     * @var Container
+     */
+    protected $container = null;
+
+    /**
      * @var Config
      */
     protected $config = null;
@@ -38,6 +43,16 @@ abstract class Application
         $this->env = $env;
 
         $this->dirs = $this->getDefaultDirs();
+    }
+
+    public function setContainer(Container $container)
+    {
+        $this->container = $container;
+    }
+
+    public function getContainer()
+    {
+        return $this->container;
     }
 
     public function loadConfig()

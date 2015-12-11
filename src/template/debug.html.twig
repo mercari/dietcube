@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <style>
+      body {
+        font-family: "Open Sans", "Hervetica Neue", sans-serif;
+      }
+      pre {
+        padding: 20px;
+        background: #fff;
+        border: solid 1px #ccc;
+        border-radius: 10px;
+        font-family: menlo, monospace;
+        word-wrap: break-word;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  </head>
+  <body class="container-fluid" style="">
+    <div class="row" style="">
+      <div class="col-md-12">
+        <h1>Dietcake Critical Error: {{ error_class_name }}</h1>
+        <p style="">
+        {{ errors.getMessage }}
+        </p>
+
+        <h2>Routes</h2>
+        <table class="table table-bordered">
+          <tr>
+            <th>Controller</th>
+            <td>x</td>
+          </tr>
+
+          <tr>
+            <th>Action</th>
+            <td>x</td>
+          </tr>
+        </table>
+
+        <h2>Stack Trace</h2>
+        <pre>{{ error_trace }}</pre>
+
+        <h2>Server Information</h2>
+        <h3>GET</h3>
+        <pre>{{ dump(get_params) }}</pre>
+        <h3>POST</h3>
+        <pre>{{ dump(post_params) }}</pre>
+        <h3>COOKIE</h3>
+        <pre>{{ dump(cookie_params) }}</pre>
+        <h3>SERVER</h3>
+        <pre>{{ dump(server_params) }}</pre>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -6,6 +6,9 @@
 namespace Dietcube;
 
 use Dietcube\Exception\DCException;
+use Dietcube\Exception\HttpNotFoundException;
+use Dietcube\Exception\HttpMethodNotAllowedException;
+use Dietcube\Exception\HttpErrorException;
 use Pimple\Container;
 use FastRoute\Dispatcher as RouteDispatcher;
 use Monolog\Logger;
@@ -29,6 +32,7 @@ class Dispatcher
 
         $container = $this->container = new Container();
         $this->container['app'] = $this->app;
+        $this->app->setContainer($container);
         $config = $this->container['app.config'] = $this->app->getConfig();
 
         $this->container['logger'] = $logger = $this->createLogger(
@@ -99,12 +103,23 @@ class Dispatcher
         $this->container['global.cookie'] = new Parameters($_COOKIE);
     }
 
+    protected function prepareReponse()
+    {
+        $response = new Response();
+        $this->container['response'] = $response;
+
+        return $response;
+    }
+
     public function handleRequest()
     {
         $container = $this->container;
         $logger = $container['logger'];
         $router = $container['router'];
         $debug = $container['app.config']->get('debug');
+
+        // prepare handle request
+        $response = $this->prepareReponse();
 
         $method = $container['global.server']->get('REQUEST_METHOD');
         $path = $container['app']->getPath();
@@ -118,23 +133,12 @@ class Dispatcher
 
         switch ($route_info[0]) {
         case RouteDispatcher::NOT_FOUND:
-            if ($debug) {
-                $logger->debug('Routing failed. Not Found.');
-                throw new DCException('404 Not Found');
-            }
-
-            $controller_name = $this->getErrorController();
-            $action_name = Controller::ACTION_NOT_FOUND;
+            $logger->debug('Routing failed. Not Found.');
+            throw new HttpNotFoundException('404 Not Found');
             break;
         case RouteDispatcher::METHOD_NOT_ALLOWED:
-            if ($debug) {
-                $logger->debug('Routing failed. Method Not Allowd.');
-                $allowed_methods = $route_info[1];
-                throw new DCException('405 Method Not Allowed');
-            }
-
-            $controller_name = $this->getErrorController();
-            $action_name = Controller::ACTION_METHOD_NOT_ALLOWED;
+            $logger->debug('Routing failed. Method Not Allowd.');
+            throw new HttpMethodNotAllowedException('405 Method Not Allowed');
             break;
         case RouteDispatcher::FOUND:
             $handler = $route_info[1];
@@ -146,8 +150,37 @@ class Dispatcher
         }
 
         $action_result = $this->executeAction($controller_name, $action_name, $vars);
+        $response = $response->setBody($action_result);
 
-        return $action_result;
+        return $response;
+    }
+
+    public function handleError(\Exception $errors)
+    {
+        $logger = $this->container['logger'];
+        if (!isset($this->container['response'])) {
+            $response = $this->prepareReponse();
+        } else {
+            $response = $this->container['response'];
+        }
+
+        $action_result = "";
+        if ($this->app->isDebug()) {
+            $logger->error('Error occurred. (This log is debug mode only) ', ['error' => get_class($errors), 'message' => $errors->getMessage()]);
+
+            $debug_controller = isset($this->container['app.debug_controller'])
+                ? $this->container['app.debug_controller']
+                : __NAMESPACE__ . '\\Controller\\DebugController';
+            $action_result = $this->executeAction($debug_controller, 'dumpErrors', ['errors' => $errors]);
+        } else {
+            $logger->info('Error occurred. ', ['error' => get_class($errors), 'message' => $errors->getMessage()]);
+            list($controller_name, $action_name) = $this->detectErrorAction($errors);
+
+            $action_result = $this->executeAction($controller_name, $action_name, ['errors' => $errors]);
+        }
+
+        $response->setBody($action_result);
+        return $response;
     }
 
     public function executeAction($controller_name_or_callable, $action_name, $vars = [])
@@ -179,62 +212,6 @@ class Dispatcher
         return $action_result;
     }
 
-
-    public function renderError($errors)
-    {
-        $logger = $this->container['logger'];
-
-        if (!$this->app->isDebug()) {
-            $logger->error('Error occurred. ', ['error' => get_class($errors), 'message' => $errors->getMessage()]);
-            echo $this->executeAction(
-                $this->getErrorController(),
-                Controller::ACTION_INTERNAL_ERROR,
-                [$errors]
-            );
-            return null;
-        }
-
-        if ($errors instanceof \Exception) {
-            echo<<<EOT
-<html>
-    <head>
-        <style>
-        h1 {
-            font-size: 2em;
-            margin: 2em 0 1.4em;
-        }
-        h2 {
-            font-size: 1.6em;
-            margin: 1.8em 0 1.4em;
-        }
-        pre {
-            padding: 20px;
-            background: #fff;
-            border: solid 1px #ccc;
-            border-radius: 10px;
-            font-family: menlo, monospace;
-            word-wrap: break-word;
-        }
-        </style>
-    </head>
-    <body style="padding: 20px; font-family: 'Hiragino Kaku Gothic', Helvetica; font-size: 16px; background: #fcfcfc; ">
-    <div style="margin: 0 auto;">
-        <h1>Dietcake Critical Error</h1>
-        <p style="font-size: 1.4em;">
-            {$errors->getMessage()}
-        </p>
-
-        <div>
-            <h2>Stack Trace</h2>
-            <pre>{$errors->getTraceAsString()}</pre>
-        </div>
-    </div>
-    </body>
-</html>
-EOT;
-        }
-    }
-
     protected function getErrorController()
     {
         $error_controller = isset($this->container['app.error_controller'])
@@ -264,6 +241,19 @@ EOT;
         return [$controller_name, $action_name];
     }
 
+    protected function detectErrorAction(\Exception $errors)
+    {
+        $error_controller = $this->getErrorController();
+        if ($errors instanceof HttpNotFoundException) {
+            return [$error_controller, Controller::ACTION_NOT_FOUND];
+        } else if ($errors instanceof HttpMethodNotAllowedException) {
+            return [$error_controller, Controller::ACTION_METHOD_NOT_ALLOWED];
+        }
+
+        // Do internalError acition for any errors.
+        return [$error_controller, Controller::ACTION_INTERNAL_ERROR];
+    }
+
     public static function getEnv($env = 'production')
     {
         if (isset($_SERVER['DIET_ENV'])) {
@@ -282,11 +272,15 @@ EOT;
 
         try {
             $response = $dispatcher->handleRequest();
-            if ($response !== null) {
-                echo $response;
-            }
         } catch (\Exception $e) { //とりあえず
-            $dispatcher->renderError($e);
+            $response = $dispatcher->handleError($e);
+        }
+
+        if ($response instanceof Response) {
+            $response->sendHeaders();
+            $response->sendBody();
+        } else {
+
         }
     }
 }

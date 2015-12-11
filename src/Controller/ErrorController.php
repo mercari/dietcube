@@ -5,22 +5,21 @@
 
 namespace Dietcube\Controller;
 
-use Dietcube\Controller as BaseController;
-
-class ErrorController extends BaseController
+class ErrorController extends InternalControllerAbstract
 {
     public function notFound()
     {
-        return null;
+        return $this->render('error404');
     }
 
     public function methodNotAllowed()
     {
-        return null;
+        return $this->render('error403');
     }
 
     public function internalError(\Exception $error)
     {
-        return null;
+        $this->setHeader('HTTP', 500, $replace = true);
+        return $this->render('error500', ['error' => $error]);
     }
 }
