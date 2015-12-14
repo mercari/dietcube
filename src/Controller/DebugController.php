@@ -13,7 +13,7 @@ class DebugController extends InternalControllerAbstract
             'error_class_name' => get_class($errors),
             'errors' => $errors,
             'error_trace' => preg_replace(
-                ['!' . $this->get('app')->getAppRoot() . '!',],
+                ['!' . $this->get('app')->getAppRoot() . '!', ],
                 ['#root'],
                 $errors->getTraceAsString()
             ),
