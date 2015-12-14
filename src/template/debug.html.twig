@@ -1,8 +1,9 @@
 <html>
   <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <style>
       body {
-        font-family: "Open Sans", "Hervetica Neue", sans-serif;
+        font-family: "Open Sans", "Helvetica Neue", sans-serif;
       }
       pre {
         padding: 20px;
@@ -14,7 +15,6 @@
         }
     </style>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
   </head>
   <body class="container-fluid" style="">
     <div class="row" style="">
@@ -28,17 +28,28 @@
         <table class="table table-bordered">
           <tr>
             <th>Controller</th>
-            <td>x</td>
+            <td>{{ controller_name }}</td>
           </tr>
 
           <tr>
             <th>Action</th>
-            <td>x</td>
+            <td>{{ action_name }}</td>
           </tr>
         </table>
 
         <h2>Stack Trace</h2>
         <pre>{{ error_trace }}</pre>
+
+        <h2>Application</h2>
+        <h3>Directories</h3>
+        <dl class="dl-horizontal">
+          <dt>App Root (#root)</dt><dd>{{ dirs.app_root }}</dd>
+          <dt>Config</dt><dd>{{ dirs.config_dir }}</dd>
+          <dt>Template</dt><dd>{{ dirs.template_dir }}</dd>
+          <dt>Resource</dt><dd>{{ dirs.resource_dir }}</dd>
+          <dt>Tmp</dt><dd>{{ dirs.tmp_dir }}</dd>
+          <dt>Vendor (#vendor)</dt><dd>{{ dirs.vendor_dir }}</dd>
+        </dl>
 
         <h2>Server Information</h2>
         <h3>GET</h3>

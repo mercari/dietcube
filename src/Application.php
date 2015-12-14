@@ -179,6 +179,11 @@ abstract class Application
         return $this->dirs['tmp'];
     }
 
+    public function getVendorDir()
+    {
+        return $this->dirs['vendor'];
+    }
+
     public function isDebug()
     {
         return $this->debug;
