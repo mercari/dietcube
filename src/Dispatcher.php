@@ -246,7 +246,7 @@ class Dispatcher
         $error_controller = $this->getErrorController();
         if ($errors instanceof HttpNotFoundException) {
             return [$error_controller, Controller::ACTION_NOT_FOUND];
-        } else if ($errors instanceof HttpMethodNotAllowedException) {
+        } elseif ($errors instanceof HttpMethodNotAllowedException) {
             return [$error_controller, Controller::ACTION_METHOD_NOT_ALLOWED];
         }
 
@@ -280,7 +280,6 @@ class Dispatcher
             $response->sendHeaders();
             $response->sendBody();
         } else {
-
         }
     }
 }
