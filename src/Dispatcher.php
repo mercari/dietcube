@@ -89,6 +89,15 @@ class Dispatcher
             'charset' => $config->get('twig.charset', 'utf-8'),
         ]);
 
+        // add built-in template path
+        $loader->addPath(__DIR__ . '/template/error');
+
+        if ($this->app->isDebug()) {
+            // add built-in debug template path
+            $twig->addExtension(new \Twig_Extension_Debug());
+            $loader->addPath(__DIR__ . '/template/debug', 'debug');
+        }
+
         $twig->addGlobal('query', $this->container['global.get']->getData());
         $twig->addGlobal('body', $this->container['global.post']->getData());
         return $twig;

@@ -5,7 +5,9 @@
 
 namespace Dietcube\Controller;
 
-class DebugController extends InternalControllerAbstract
+use Dietcube\Controller as BaseController;
+
+class DebugController extends BaseController
 {
     public function dumpErrors(\Exception $errors)
     {
@@ -14,7 +16,7 @@ class DebugController extends InternalControllerAbstract
         $vendor_dir = $app->getVendorDir();
         $router = $this->get('router');
 
-        return $this->render('debug', [
+        return $this->render('@debug/debug', [
             'config' => $app->getConfig()->getData(),
             'router' => [
                 'dispatched_url' => $router->getDispatchedUrl(),
