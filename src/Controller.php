@@ -19,16 +19,6 @@ class Controller
         $this->container = $container;
     }
 
-    // TODO どうにかする
-    public function setHeader($header, $header_value, $code = null, $replace = true)
-    {
-        if ($code) {
-            header("{$header}: $header_value", $replace, intval($code));
-        } else {
-            header("{$header}: $header_value", $replace);
-        }
-    }
-
     public function setVars($key, $value = null)
     {
         if (is_array($key)) {
@@ -78,20 +68,19 @@ class Controller
 
     protected function redirect($uri, $code = 302)
     {
-        $this->setHeader('Location', $uri, $code);
+        $this->getResponse()->setHeader('Location', $uri, $code);
 
         return null;
     }
 
-    protected function error($name, $code = 500, array $vars = [])
+    protected function getResponse()
     {
-        header("HTTP", true, intval($code));
-        return $this->render($name, $vars);
+        return $this->get('response');
     }
 
     protected function json($vars, $charset = 'utf-8')
     {
-        $this->setHeader('Content-Type', 'application/json;charset=' . $charset);
+        $this->getResponse()->setHeader('Content-Type', 'application/json;charset=' . $charset);
 
         return json_encode($vars);
     }

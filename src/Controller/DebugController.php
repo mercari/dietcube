@@ -33,7 +33,7 @@ class DebugController extends InternalControllerAbstract
             'error_class_name' => get_class($errors),
             'errors' => $errors,
             'error_trace' => preg_replace(
-                ['!' . $app_root . '!', '!' . $vendor_dir . '!' , ],
+                ['!' . $app_root . '!', '!' . $vendor_dir . '!', ],
                 ['#root ', '#vendor ', ],
                 $errors->getTraceAsString()
             ),
