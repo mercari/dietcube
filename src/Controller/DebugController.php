@@ -10,13 +10,17 @@ class DebugController extends InternalControllerAbstract
     public function dumpErrors(\Exception $errors)
     {
         $app = $this->get('app');
-
         $app_root = $app->getAppRoot();
         $vendor_dir = $app->getVendorDir();
+        $router = $this->get('router');
 
         return $this->render('debug', [
-            'controller_name' => __CLASS__,
-            'action_name' => __METHOD__,
+            'config' => $app->getConfig()->getData(),
+            'router' => [
+                'dispatched_url' => $router->getDispatchedUrl(),
+                'dispatched_method' => $router->getDispatchedMethod(),
+                'route_info' => $router->getRouteInfo(),
+            ],
             'dirs' => [
                 'app_root' => $app_root,
                 'vendor_dir' => $vendor_dir,
