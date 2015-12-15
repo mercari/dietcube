@@ -205,7 +205,7 @@ class Dispatcher
         }
 
         $logger->debug(
-            'Dispatch action.',
+            'Exceute action.',
             ['controller' => $controller_name, 'action' => $action_name, 'vars' => $vars]);
 
         $action_result = call_user_func_array($executable, $vars);
