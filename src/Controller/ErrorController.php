@@ -6,20 +6,23 @@
 namespace Dietcube\Controller;
 
 class ErrorController extends InternalControllerAbstract
+    implements ErrorControllerInterface
 {
     public function notFound()
     {
+        $this->getResponse()->setStatusCode(404);
         return $this->render('error404');
     }
 
     public function methodNotAllowed()
     {
+        $this->getResponse()->setStatusCode(403);
         return $this->render('error403');
     }
 
     public function internalError(\Exception $error)
     {
-        $this->setHeader('HTTP', 500, $replace = true);
+        $this->getResponse()->setStatusCode(500);
         return $this->render('error500', ['error' => $error]);
     }
 }
