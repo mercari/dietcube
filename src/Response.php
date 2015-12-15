@@ -91,12 +91,12 @@ class Response
 
     public function setStatusCode($status_code)
     {
-        if (null !== self::PHRASES[$this->status_code]) {
+        if (null === self::PHRASES[$this->status_code]) {
             throw new \InvalidArgumentException("Invalid status code '{$this->status_code}'");
         }
 
         $this->status_code = $status_code;
-        $this->setReasonPhrases();
+        $this->setReasonPhrase();
 
         return $this;
     }
@@ -154,7 +154,8 @@ class Response
 
         $this->sendHttpHeader();
         foreach ($this->headers as $name => $value) {
-            header("{$name}: {$value}", true);
+            $v = implode(',', $value);
+            header("{$name}: {$v}", true);
         }
     }
 
@@ -165,8 +166,8 @@ class Response
 
     public function setHeaders(array $headers)
     {
-        foreach ($headers as $header) {
-            $this->setHeaders(...$header);
+        foreach ($headers as $header => $value) {
+            $this->setHeader($header, $value);
         }
 
         return $this;
