@@ -76,7 +76,7 @@ class Response
     /** @var int */
     protected $status_code = 200;
 
-    /** @var nullstring */
+    /** @var null|string */
     protected $body = null;
 
     protected $headers = [];

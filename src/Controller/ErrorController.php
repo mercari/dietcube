@@ -5,9 +5,9 @@
 
 namespace Dietcube\Controller;
 
-use Dietcube\Controller as BaseController;
+use Dietcube\Controller;
 
-class ErrorController extends BaseController implements ErrorControllerInterface
+class ErrorController extends Controller implements ErrorControllerInterface
 {
     public function notFound()
     {

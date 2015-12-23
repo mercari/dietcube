@@ -5,9 +5,9 @@
 
 namespace Dietcube\Controller;
 
-use Dietcube\Controller as BaseController;
+use Dietcube\Controller;
 
-class DebugController extends BaseController
+class DebugController extends Controller
 {
     public function dumpErrors(\Exception $errors)
     {
