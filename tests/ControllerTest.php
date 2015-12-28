@@ -30,7 +30,6 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 
         $method = $this->getInvokableMethod('isPost');
         $this->assertTrue($method->invoke($controller));
-
     }
 
     public function testIsPostOnGet()
