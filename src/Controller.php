@@ -78,6 +78,13 @@ class Controller
         return $this->get('response');
     }
 
+    /**
+     * Helper method to respond JSON.
+     *
+     * @param array $vars
+     * @param string|null $charset
+     * @return string JSON encoded string
+     */
     protected function json($vars, $charset = 'utf-8')
     {
         $this->getResponse()->setHeader('Content-Type', 'application/json;charset=' . $charset);
