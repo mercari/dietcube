@@ -7,15 +7,9 @@ namespace Dietcube\Events;
 
 use Dietcube\Application;
 use Dietcube\Response;
-use Symfony\Component\EventDispatcher\Event;
 
-class FilterResponseEvent extends Event
+class FilterResponseEvent extends DietcubeEventAbstract
 {
-    /**
-     * @var Application
-     */
-    protected $app;
-
     /**
      * @var Response
      */

@@ -7,15 +7,9 @@ namespace Dietcube\Events;
 
 use Dietcube\Application;
 use Dietcube\Router;
-use Symfony\Component\EventDispatcher\Event;
 
-class RoutingEvent extends Event
+class RoutingEvent extends DietcubeEventAbstract
 {
-    /**
-     * @var Application
-     */
-    protected $app;
-
     protected $router;
 
     protected $controller_name;

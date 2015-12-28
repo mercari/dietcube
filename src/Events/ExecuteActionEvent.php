@@ -7,15 +7,9 @@ namespace Dietcube\Events;
 
 use Dietcube\Application;
 use Dietcube\Response;
-use Symfony\Component\EventDispatcher\Event;
 
-class ExecuteActionEvent extends Event
+class ExecuteActionEvent extends DietcubeEventAbstract
 {
-    /**
-     * @var Application
-     */
-    protected $app;
-
     protected $executable;
     protected $vars = [];
 
