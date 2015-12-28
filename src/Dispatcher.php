@@ -162,7 +162,7 @@ class Dispatcher
 
         $method = $container['global.server']->get('REQUEST_METHOD');
         $path = $container['app']->getPath();
-        $this->event_dispatcher->addListener(DietcubeEvents::ROUTING, function(Event $event) use ($method, $path) {
+        $this->event_dispatcher->addListener(DietcubeEvents::ROUTING, function (Event $event) use ($method, $path) {
             list($controller_name, $action_name, $vars) = $this->dispatchRouter($method, $path);
             $event->setRouteInfo($controller_name, $action_name, $vars);
         });
