@@ -15,6 +15,9 @@
         "phpunit/php-code-coverage": "3.x",
         "piece/stagehand-testrunner": "4.1.x"
     },
+    "scripts": {
+      "test": "phpunit"
+    },
     "autoload": {
         "psr-4": {
             "Dietcube\\": "src/"

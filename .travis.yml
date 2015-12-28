@@ -12,7 +12,7 @@ before_script:
 
 script:
   - ./vendor/bin/php-cs-fixer fix --verbose --diff --dry-run
-  - phpunit
+  - composer test
 
 matrix:
   allow_failures:
