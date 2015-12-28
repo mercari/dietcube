@@ -78,9 +78,8 @@ class Router
     }
 
     /**
-     * ルート名から URL を生成する
-     *
-     * Slim3 の Router を参考にしています
+     * Generate URL from route name (handler name).
+     * This methods is inspired by Slim3's Router.
      * @see https://github.com/slimphp/Slim/blob/3494b3625ec51c2de90d9d893767d97f876e49ff/Slim/Router.php#L162
      *
      * @param  string $handler      Route handler name
