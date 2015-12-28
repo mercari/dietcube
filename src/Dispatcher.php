@@ -15,6 +15,7 @@ use Dietcube\Exception\DCException;
 use Dietcube\Exception\HttpNotFoundException;
 use Dietcube\Exception\HttpMethodNotAllowedException;
 use Dietcube\Exception\HttpErrorException;
+use Dietcube\Twig\DietcubeExtension;
 use Pimple\Container;
 use FastRoute\Dispatcher as RouteDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -117,6 +118,9 @@ class Dispatcher
         // add built-in template path
         $loader->addPath(__DIR__ . '/template/error');
 
+        // add built-in extension
+        $twig->addExtension((new DietcubeExtension())->setContainer($this->container));
+
         if ($this->app->isDebug()) {
             // add built-in debug template path
             $twig->addExtension(new \Twig_Extension_Debug());
@@ -125,6 +129,7 @@ class Dispatcher
 
         $twig->addGlobal('query', $this->container['global.get']->getData());
         $twig->addGlobal('body', $this->container['global.post']->getData());
+
         return $twig;
     }
 

@@ -54,9 +54,14 @@ class Controller
         return $this->container['global.post']->get($name, $default);
     }
 
-    protected function generateUrl($handler, array $data = [], array $query_params = [])
+    protected function generateUrl($handler, array $data = [], array $query_params = [], $is_absolute = false)
     {
-        return $this->container['router']->url($handler, $data, $query_params);
+        $url = $path = $this->container['router']->url($handler, $data, $query_params);
+        if ($is_absolute) {
+            $url = $this->container['app']->getUrl() . $path;
+        }
+
+        return $url;
     }
 
     protected function findTemplate($name)

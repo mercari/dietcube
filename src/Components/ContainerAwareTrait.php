@@ -14,8 +14,13 @@ trait ContainerAwareTrait
      */
     protected $container = null;
 
+    /**
+     * @param Container $container
+     */
     public function setContainer(Container $container)
     {
         $this->container = $container;
+
+        return $this;
     }
 }
