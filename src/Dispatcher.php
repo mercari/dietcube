@@ -5,12 +5,20 @@
 
 namespace Dietcube;
 
+use Dietcube\Events\DietcubeEvents;
+use Dietcube\Events\BootEvent;
+use Dietcube\Events\RoutingEvent;
+use Dietcube\Events\ExecuteActionEvent;
+use Dietcube\Events\FilterResponseEvent;
+use Dietcube\Events\FinishRequestEvent;
 use Dietcube\Exception\DCException;
 use Dietcube\Exception\HttpNotFoundException;
 use Dietcube\Exception\HttpMethodNotAllowedException;
 use Dietcube\Exception\HttpErrorException;
 use Pimple\Container;
 use FastRoute\Dispatcher as RouteDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\Event;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\ErrorLogHandler;
@@ -18,8 +26,20 @@ use Monolog\Processor\PsrLogMessageProcessor;
 
 class Dispatcher
 {
+    /**
+     * @var Application
+     */
     protected $app;
+
+    /**
+     * @var Container
+     */
     protected $container;
+
+    /**
+     * @var EventDispatcher
+     */
+    protected $event_dispatcher;
 
     public function __construct(Application $app)
     {
@@ -31,6 +51,9 @@ class Dispatcher
         $this->app->loadConfig();
 
         $container = $this->container = new Container();
+
+        $this->container['event_dispatcher'] = $this->event_dispatcher = new EventDispatcher();
+
         $this->container['app'] = $this->app;
         $this->app->setContainer($container);
         $config = $this->container['app.config'] = $this->app->getConfig();
@@ -58,6 +81,8 @@ class Dispatcher
         }
 
         $this->app->config($this->container);
+
+        $this->event_dispatcher->dispatch(DietcubeEvents::BOOT, new BootEvent($this->app));
     }
 
     protected function createLogger($path, $level = Logger::WARNING)
@@ -112,6 +137,9 @@ class Dispatcher
         $this->container['global.cookie'] = new Parameters($_COOKIE);
     }
 
+    /**
+     * @return Response
+     */
     protected function prepareReponse()
     {
         $response = new Response();
@@ -120,11 +148,13 @@ class Dispatcher
         return $response;
     }
 
+    /**
+     * @return Response
+     */
     public function handleRequest()
     {
         $container = $this->container;
         $logger = $container['logger'];
-        $router = $container['router'];
         $debug = $container['app.config']->get('debug');
 
         // prepare handle request
@@ -132,38 +162,26 @@ class Dispatcher
 
         $method = $container['global.server']->get('REQUEST_METHOD');
         $path = $container['app']->getPath();
-        $logger->debug('Router dispatch.', ['method' => $method, 'path' => $path]);
+        $this->event_dispatcher->addListener(DietcubeEvents::ROUTING, function(Event $event) use ($method, $path) {
+            list($controller_name, $action_name, $vars) = $this->dispatchRouter($method, $path);
+            $event->setRouteInfo($controller_name, $action_name, $vars);
+        });
 
-        $router->init();
-        $route_info = $router->dispatch($method, $path);
+        $event = new RoutingEvent($this->app, $container['router']);
+        $this->event_dispatcher->dispatch(DietcubeEvents::ROUTING, $event);
 
-        $handler = null;
-        $vars = [];
-
-        switch ($route_info[0]) {
-        case RouteDispatcher::NOT_FOUND:
-            $logger->debug('Routing failed. Not Found.');
-            throw new HttpNotFoundException('404 Not Found');
-            break;
-        case RouteDispatcher::METHOD_NOT_ALLOWED:
-            $logger->debug('Routing failed. Method Not Allowd.');
-            throw new HttpMethodNotAllowedException('405 Method Not Allowed');
-            break;
-        case RouteDispatcher::FOUND:
-            $handler = $route_info[1];
-            $vars = $route_info[2];
-
-            list($controller_name, $action_name) = $this->detectAction($handler);
-            $logger->debug('Route found.', ['handler' => $handler]);
-            break;
-        }
+        list($controller_name, $action_name, $vars) = $event->getRouteInfo();
 
         $action_result = $this->executeAction($controller_name, $action_name, $vars);
         $response = $response->setBody($action_result);
 
-        return $response;
+        return $this->filterResponse($response);
     }
 
+    /**
+     * @params \Exception $errors
+     * @return Response
+     */
     public function handleError(\Exception $errors)
     {
         $logger = $this->container['logger'];
@@ -189,7 +207,8 @@ class Dispatcher
         }
 
         $response->setBody($action_result);
-        return $response;
+
+        return $this->filterResponse($response);
     }
 
     public function executeAction($controller_name_or_callable, $action_name, $vars = [])
@@ -217,8 +236,18 @@ class Dispatcher
             'Exceute action.',
             ['controller' => $controller_name, 'action' => $action_name, 'vars' => $vars]);
 
-        $action_result = call_user_func_array($executable, $vars);
-        return $action_result;
+
+        $this->event_dispatcher->addListener(DietcubeEvents::ACTION, function (Event $event) {
+            $executable = $event->getExecutable();
+            $vars = $event->getVars();
+
+            $event->setResult(call_user_func_array($executable, $vars));
+        }, 0);
+
+        $event = new ExecuteActionEvent($this->app, $executable, $vars);
+        $this->event_dispatcher->dispatch(DietcubeEvents::ACTION, $event);
+
+        return $event->getResult();
     }
 
     protected function getErrorController()
@@ -227,6 +256,44 @@ class Dispatcher
             ? $this->container['app.error_controller']
             : __NAMESPACE__ . '\\Controller\\ErrorController';
         return $error_controller;
+    }
+
+    /**
+     * Dispatche router with HTTP request information.
+     */
+    protected function dispatchRouter($method, $path)
+    {
+        $router = $this->container['router'];
+        $logger = $this->container['logger'];
+
+        $logger->debug('Router dispatch.', ['method' => $method, 'path' => $path]);
+
+        $router->init();
+        $route_info = $router->dispatch($method, $path);
+
+        $handler = null;
+        $controller_name = null;
+        $vars = [];
+
+        switch ($route_info[0]) {
+        case RouteDispatcher::NOT_FOUND:
+            $logger->debug('Routing failed. Not Found.');
+            throw new HttpNotFoundException('404 Not Found');
+            break;
+        case RouteDispatcher::METHOD_NOT_ALLOWED:
+            $logger->debug('Routing failed. Method Not Allowd.');
+            throw new HttpMethodNotAllowedException('405 Method Not Allowed');
+            break;
+        case RouteDispatcher::FOUND:
+            $handler = $route_info[1];
+            $vars = $route_info[2];
+
+            list($controller_name, $action_name) = $this->detectAction($handler);
+            $logger->debug('Route found.', ['handler' => $handler]);
+            break;
+        }
+
+        return [$controller_name, $action_name, $vars];
     }
 
     protected function detectAction($handler)
@@ -263,6 +330,39 @@ class Dispatcher
         return [$error_controller, Controller::ACTION_INTERNAL_ERROR];
     }
 
+    /**
+     * Dispatch RESPONSE event to filter response.
+     *
+     * @param Response $response
+     * @return Response
+     */
+    protected function filterResponse(Response $response)
+    {
+        $event = new FilterResponseEvent($this->app, $response);
+        $this->event_dispatcher->dispatch(DietcubeEvents::RESPONSE, $event);
+
+        return $this->finishRequest($event->getResponse());
+    }
+
+    /**
+     * Finish request and send response.
+     *
+     * @param Response $response
+     * @return Response
+     */
+    protected function finishRequest(Response $response)
+    {
+        $event = new FinishRequestEvent($this->app, $response);
+        $this->event_dispatcher->dispatch(DietcubeEvents::FINISH_REQUEST, $event);
+
+        $response = $event->getResponse();
+
+        $response->sendHeaders();
+        $response->sendBody();
+
+        return $response;
+    }
+
     public static function getEnv($env = 'production')
     {
         if (isset($_SERVER['DIET_ENV'])) {
@@ -282,13 +382,9 @@ class Dispatcher
         try {
             $response = $dispatcher->handleRequest();
         } catch (\Exception $e) { //とりあえず
+            // Please handle errors occured on executing Dispatcher::handleError with your web server.
+            // Dietcube doesn't care these errors.
             $response = $dispatcher->handleError($e);
-        }
-
-        if ($response instanceof Response) {
-            $response->sendHeaders();
-            $response->sendBody();
-        } else {
         }
     }
 }
