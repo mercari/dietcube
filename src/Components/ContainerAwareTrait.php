@@ -9,6 +9,9 @@ use Pimple\Container;
 
 trait ContainerAwareTrait
 {
+    /**
+     * @var Container
+     */
     protected $container = null;
 
     public function setContainer(Container $container)

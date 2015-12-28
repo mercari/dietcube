@@ -5,11 +5,14 @@
 
 namespace Dietcube;
 
+use Dietcube\Components\ContainerAwareTrait;
 use Dietcube\Exception\DCException;
 use Pimple\Container;
 
 abstract class Application
 {
+    use ContainerAwareTrait;
+
     protected $app_root;
 
     protected $app_namespace;
@@ -17,11 +20,6 @@ abstract class Application
     protected $env;
 
     protected $debug = false;
-
-    /**
-     * @var Container
-     */
-    protected $container = null;
 
     /**
      * @var Config
@@ -43,11 +41,6 @@ abstract class Application
         $this->env = $env;
 
         $this->dirs = $this->getDefaultDirs();
-    }
-
-    public function setContainer(Container $container)
-    {
-        $this->container = $container;
     }
 
     public function getContainer()
