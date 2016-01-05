@@ -56,12 +56,7 @@ class Controller
 
     protected function generateUrl($handler, array $data = [], array $query_params = [], $is_absolute = false)
     {
-        $url = $path = $this->container['router']->url($handler, $data, $query_params);
-        if ($is_absolute) {
-            $url = $this->container['app']->getUrl() . $path;
-        }
-
-        return $url;
+        return $this->container['router']->url($handler, $data, $query_params, $is_absolute);
     }
 
     protected function findTemplate($name)

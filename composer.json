@@ -17,7 +17,8 @@
         "piece/stagehand-testrunner": "4.1.x"
     },
     "scripts": {
-      "test": "phpunit"
+      "test": "phpunit",
+      "cs-fix": "php-cs-fixer fix"
     },
     "autoload": {
         "psr-4": {

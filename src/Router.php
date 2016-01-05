@@ -85,11 +85,12 @@ class Router
      * @param  string $handler      Route handler name
      * @param  array  $data         Route URI segments replacement data
      * @param  array  $query_params Optional query string parameters
+     * @param  bool   $is_absolute  Whether generate absolute url or not
      * @return string
      * @throws \RuntimeException         If named route does not exist
      * @throws \InvalidArgumentException If required data not provided
      */
-    public function url($handler, array $data = [], array $query_params = [])
+    public function url($handler, array $data = [], array $query_params = [], $is_absolute = false)
     {
         if ($this->named_routes === null) {
             $this->buildNameIndex();
@@ -110,6 +111,10 @@ class Router
 
         if ($query_params) {
             $url .= '?' . http_build_query($query_params);
+        }
+
+        if ($is_absolute) {
+            $url = $this->container['app']->getUrl() . $url;
         }
 
         return $url;

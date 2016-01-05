@@ -37,13 +37,7 @@ class DietcubeExtension extends \Twig_Extension
     public function url($handler, array $data = [], array $query_params = [], $is_absolute = false)
     {
         $router = $this->container['router'];
-        $url = $path = $router->url($handler, $data, $query_params);
-
-        if ($is_absolute) {
-            $url = $this->container['app']->getUrl() . $path;
-        }
-
-        return $url;
+        return $router->url($handler, $data, $query_params, $is_absolute);
     }
 
     /**
