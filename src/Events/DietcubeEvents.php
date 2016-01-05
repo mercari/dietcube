@@ -11,9 +11,9 @@ final class DietcubeEvents
 
     const ROUTING = 'dietcube.routing';
 
-    const ACTION = 'dietcube.action';
+    const EXECUTE_ACTION = 'dietcube.execute_action';
 
-    const RESPONSE = 'dietcube.response';
+    const FILTER_RESPONSE = 'dietcube.filter_response';
 
     const FINISH_REQUEST = 'dietcube.finish_request';
 }

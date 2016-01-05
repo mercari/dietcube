@@ -237,7 +237,7 @@ class Dispatcher
             ['controller' => $controller_name, 'action' => $action_name, 'vars' => $vars]);
 
 
-        $this->event_dispatcher->addListener(DietcubeEvents::ACTION, function (Event $event) {
+        $this->event_dispatcher->addListener(DietcubeEvents::EXECUTE_ACTION, function (Event $event) {
             $executable = $event->getExecutable();
             $vars = $event->getVars();
 
@@ -245,7 +245,7 @@ class Dispatcher
         }, 0);
 
         $event = new ExecuteActionEvent($this->app, $executable, $vars);
-        $this->event_dispatcher->dispatch(DietcubeEvents::ACTION, $event);
+        $this->event_dispatcher->dispatch(DietcubeEvents::EXECUTE_ACTION, $event);
 
         return $event->getResult();
     }
@@ -331,7 +331,7 @@ class Dispatcher
     }
 
     /**
-     * Dispatch RESPONSE event to filter response.
+     * Dispatch FILTER_RESPONSE event to filter response.
      *
      * @param Response $response
      * @return Response
@@ -339,7 +339,7 @@ class Dispatcher
     protected function filterResponse(Response $response)
     {
         $event = new FilterResponseEvent($this->app, $response);
-        $this->event_dispatcher->dispatch(DietcubeEvents::RESPONSE, $event);
+        $this->event_dispatcher->dispatch(DietcubeEvents::FILTER_RESPONSE, $event);
 
         return $this->finishRequest($event->getResponse());
     }
@@ -381,7 +381,7 @@ class Dispatcher
 
         try {
             $response = $dispatcher->handleRequest();
-        } catch (\Exception $e) { //とりあえず
+        } catch (\Exception $e) {
             // Please handle errors occured on executing Dispatcher::handleError with your web server.
             // Dietcube doesn't care these errors.
             $response = $dispatcher->handleError($e);
