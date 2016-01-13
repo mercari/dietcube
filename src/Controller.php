@@ -19,6 +19,9 @@ class Controller
         $this->container = $container;
     }
 
+    /**
+     * @return $this
+     */
     public function setVars($key, $value = null)
     {
         if (is_array($key)) {

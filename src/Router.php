@@ -35,6 +35,9 @@ class Router
         $this->container = $container;
     }
 
+    /**
+     * @return $this
+     */
     public function addRoute(RouteInterface $route)
     {
         $this->routes[] = $route;
@@ -120,6 +123,9 @@ class Router
         return $url;
     }
 
+    /**
+     * @return $this
+     */
     public function getRouteInfo()
     {
         return $this->route_info;

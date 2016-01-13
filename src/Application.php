@@ -43,6 +43,9 @@ abstract class Application
         $this->dirs = $this->getDefaultDirs();
     }
 
+    /**
+     * @return Container
+     */
     public function getContainer()
     {
         return $this->container;
