@@ -3,6 +3,9 @@ Dietcube
 
 Dietcube is the world super fly weight & flexible PHP framework.
 
+[![Latest Stable Version](https://poser.pugx.org/dietcube/dietcube/v/stable)](https://packagist.org/packages/dietcube/dietcube)
+[![Total Downloads](https://poser.pugx.org/dietcube/dietcube/downloads)](https://packagist.org/packages/dietcube/dietcube)
+[![License](https://poser.pugx.org/dietcube/dietcube/license)](https://packagist.org/packages/dietcube/dietcube)
 
 Dietcube has:
 
