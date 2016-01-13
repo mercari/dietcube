@@ -193,7 +193,7 @@ abstract class Application
     public function getControllerByHandler($handler)
     {
         // @TODO check
-        list($controller, $action_name) = explode('::', $handler);
+        list($controller, $action_name) = explode('::', $handler, 2);
         if (!$controller || !$action_name) {
             throw new DCException('Error: handler error');
         }
