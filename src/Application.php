@@ -236,8 +236,7 @@ abstract class Application
 
     protected function detectAppNamespace()
     {
-        $current_class = get_class($this);
-        $ref = new \ReflectionClass($current_class);
+        $ref = new \ReflectionObject($this);
         return $ref->getNamespaceName();
     }
 }
