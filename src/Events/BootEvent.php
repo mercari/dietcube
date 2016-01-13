@@ -6,7 +6,6 @@
 namespace Dietcube\Events;
 
 use Dietcube\Application;
-use Dietcube\Response;
 
 class BootEvent extends DietcubeEventAbstract
 {

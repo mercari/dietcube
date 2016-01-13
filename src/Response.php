@@ -89,6 +89,9 @@ class Response
         $this->version = $version;
     }
 
+    /**
+     * @return $this
+     */
     public function setStatusCode($status_code)
     {
         if (null === self::PHRASES[$this->status_code]) {
@@ -101,11 +104,17 @@ class Response
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function getStatusCode()
     {
         return $this->status_code;
     }
 
+    /**
+     * @return $this
+     */
     public function setBody($body)
     {
         $this->body = $body;
@@ -113,6 +122,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function setReasonPhrase($phrase = null)
     {
         if ($phrase !== null) {
@@ -128,11 +140,17 @@ class Response
         throw new \InvalidArgumentException("Invalid status code '{$this->status_code}'");
     }
 
+    /**
+     * @return string
+     */
     public function getReasonPhrase()
     {
         return $this->reason_phrase;
     }
 
+    /**
+     * @return string|null
+     */
     public function getBody()
     {
         return $this->body;
@@ -164,6 +182,9 @@ class Response
         header("HTTP/{$this->version} {$this->status_code} {$this->reason_phrase}", true);
     }
 
+    /**
+     * @return $this
+     */
     public function setHeaders(array $headers)
     {
         foreach ($headers as $header => $value) {
@@ -173,6 +194,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function setHeader($header, $value)
     {
         $header = trim($header);
