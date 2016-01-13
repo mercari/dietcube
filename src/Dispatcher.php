@@ -168,16 +168,17 @@ class Dispatcher
         $method = $container['global.server']->get('REQUEST_METHOD');
         $path = $container['app']->getPath();
         $this->event_dispatcher->addListener(DietcubeEvents::ROUTING, function (Event $event) use ($method, $path) {
-            list($controller_name, $action_name, $vars) = $this->dispatchRouter($method, $path);
-            $event->setRouteInfo($controller_name, $action_name, $vars);
+            list($handler, $vars) = $this->dispatchRouter($method, $path);
+
+            $event->setRouteInfo($handler, $vars);
         });
 
         $event = new RoutingEvent($this->app, $container['router']);
         $this->event_dispatcher->dispatch(DietcubeEvents::ROUTING, $event);
 
-        list($controller_name, $action_name, $vars) = $event->getRouteInfo();
+        list($handler, $vars) = $event->getRouteInfo();
 
-        $action_result = $this->executeAction($controller_name, $action_name, $vars);
+        $action_result = $this->executeAction($handler, $vars);
         $response = $response->setBody($action_result);
 
         return $this->filterResponse($response);
@@ -203,12 +204,16 @@ class Dispatcher
             $debug_controller = isset($this->container['app.debug_controller'])
                 ? $this->container['app.debug_controller']
                 : __NAMESPACE__ . '\\Controller\\DebugController';
-            $action_result = $this->executeAction($debug_controller, 'dumpErrors', ['errors' => $errors]);
+            $controller = $this->app->createController($debug_controller);
+
+            // FIXME: debug controller method name?
+            $action_result = $this->executeAction([$controller, 'dumpErrors'], ['errors' => $errors], $fire_events = true);
         } else {
             $logger->info('Error occurred. ', ['error' => get_class($errors), 'message' => $errors->getMessage()]);
             list($controller_name, $action_name) = $this->detectErrorAction($errors);
+            $controller = $this->app->createController($controller_name);
 
-            $action_result = $this->executeAction($controller_name, $action_name, ['errors' => $errors]);
+            $action_result = $this->executeAction([$controller, $action_name], ['errors' => $errors], $fire_events = true);
         }
 
         $response->setBody($action_result);
@@ -216,43 +221,45 @@ class Dispatcher
         return $this->filterResponse($response);
     }
 
-    public function executeAction($controller_name_or_callable, $action_name, $vars = [])
+    public function executeAction($handler, $vars = [], $fire_events = true)
     {
         $logger = $this->container['logger'];
         $executable = null;
-        if (is_callable($controller_name_or_callable)) {
-            $executable = $controller_name_or_callable;
-            $controller_name = 'function()';
-            $action_name = '-';
+
+        if (is_callable($handler)) {
+            $executable = $handler;
         } else {
-            $controller_name = $controller_name_or_callable;
-            $controller = new $controller_name($this->container);
-            $controller->setVars('env', $this->container['app']->getEnv());
-            $controller->setVars('config', $this->container['app.config']->getData());
+            list($controller_name, $action_name) = $this->app->getControllerByHandler($handler);
+
+            $controller = $this->app->createController($controller_name);
             $executable = [$controller, $action_name];
         }
 
-        if (!is_callable($executable)) {
-            $logger->error('Action not dispatchable.', ['controller' => $controller_name, 'action' => $action_name]);
-            throw new DCException("'{$controller_name}' doesn't have such an action '{$action_name}'");
-        }
+        if ($fire_events) {
+            $event = new ExecuteActionEvent($this->app, $executable, $vars);
+            $this->event_dispatcher->dispatch(DietcubeEvents::EXECUTE_ACTION, $event);
 
-        $logger->debug(
-            'Exceute action.',
-            ['controller' => $controller_name, 'action' => $action_name, 'vars' => $vars]);
-
-
-        $this->event_dispatcher->addListener(DietcubeEvents::EXECUTE_ACTION, function (Event $event) {
             $executable = $event->getExecutable();
             $vars = $event->getVars();
+        }
 
-            $event->setResult(call_user_func_array($executable, $vars));
-        }, 0);
+        // Executable may changed by custom event so parse info again.
+        if ($executable instanceof \Closure) {
+            $controller_name = 'function()';
+            $action_name = '-';
+        } else {
+            $controller_name = get_class($executable[0]);
+            $action_name = $executable[1];
 
-        $event = new ExecuteActionEvent($this->app, $executable, $vars);
-        $this->event_dispatcher->dispatch(DietcubeEvents::EXECUTE_ACTION, $event);
+            if (!is_callable($executable)) {
+                // anon function is always callable so when the handler is anon function it never come here.
+                $logger->error('Action not dispatchable.', ['controller' => $controller_name, 'action_name' => $action_name]);
+                throw new DCException("'{$controller_name}::{$action_name}' is not a valid action.");
+            }
+        }
 
-        return $event->getResult();
+        $logger->debug('Exceute action.', ['controller' => $controller_name, 'action' => $action_name, 'vars' => $vars]);
+        return call_user_func_array($executable, $vars);
     }
 
     protected function getErrorController()
@@ -277,7 +284,6 @@ class Dispatcher
         $route_info = $router->dispatch($method, $path);
 
         $handler = null;
-        $controller_name = null;
         $vars = [];
 
         switch ($route_info[0]) {
@@ -292,34 +298,11 @@ class Dispatcher
         case RouteDispatcher::FOUND:
             $handler = $route_info[1];
             $vars = $route_info[2];
-
-            list($controller_name, $action_name) = $this->detectAction($handler);
             $logger->debug('Route found.', ['handler' => $handler]);
             break;
         }
 
-        return [$controller_name, $action_name, $vars];
-    }
-
-    protected function detectAction($handler)
-    {
-        if (is_callable($handler)) {
-            return [$handler, null];
-        }
-        $logger = $this->container['logger'];
-
-        // @TODO check
-        list($controller, $action_name) = explode('::', $handler);
-        if (!$controller || !$action_name) {
-            throw new DCException('Error: handler error');
-        }
-
-        $controller_name = $this->container['app']->getAppNamespace()
-            . '\\Controller\\'
-            . str_replace('/', '\\', $controller)
-            . 'Controller';
-
-        return [$controller_name, $action_name];
+        return [$handler, $vars];
     }
 
     protected function detectErrorAction(\Exception $errors)

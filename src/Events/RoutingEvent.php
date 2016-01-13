@@ -12,8 +12,7 @@ class RoutingEvent extends DietcubeEventAbstract
 {
     protected $router;
 
-    protected $controller_name;
-    protected $action_name;
+    protected $handler;
     protected $vars = [];
 
     public function __construct(Application $app, Router $router)
@@ -32,14 +31,16 @@ class RoutingEvent extends DietcubeEventAbstract
         $this->router = $router;
     }
 
-    public function setControllerName($controller_name)
+    public function setHandler($handler)
     {
-        $this->controller_name = $controller_name;
+        $this->handler = $handler;
+
+        return $this;
     }
 
-    public function setActionName($action_name)
+    public function getHandler($handler)
     {
-        $this->action_name = $action_name;
+        return $this->handler;
     }
 
     public function setVars(array $vars)
@@ -47,15 +48,19 @@ class RoutingEvent extends DietcubeEventAbstract
         $this->vars = $vars;
     }
 
-    public function setRouteInfo($controller_name, $action_name, array $vars = [])
+    public function getVars(array $vars)
     {
-        $this->controller_name = $controller_name;
-        $this->action_name = $action_name;
+        return $this->vars;
+    }
+
+    public function setRouteInfo($handler, array $vars = [])
+    {
+        $this->handler = $handler;
         $this->vars = $vars;
     }
 
     public function getRouteInfo()
     {
-        return [$this->controller_name, $this->action_name, $this->vars];
+        return [$this->handler, $this->vars];
     }
 }

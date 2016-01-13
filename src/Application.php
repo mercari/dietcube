@@ -190,6 +190,31 @@ abstract class Application
         ];
     }
 
+    public function getControllerByHandler($handler)
+    {
+        // @TODO check
+        list($controller, $action_name) = explode('::', $handler);
+        if (!$controller || !$action_name) {
+            throw new DCException('Error: handler error');
+        }
+
+        $controller_name = $this->getAppNamespace()
+            . '\\Controller\\'
+            . str_replace('/', '\\', $controller)
+            . 'Controller';
+
+        return [$controller_name, $action_name];
+    }
+
+    public function createController($controller_name)
+    {
+        $controller = new $controller_name($this->container);
+        $controller->setVars('env', $this->getEnv());
+        $controller->setVars('config', $this->container['app.config']->getData());
+
+        return $controller;
+    }
+
     protected function getDefaultDirs()
     {
         return [

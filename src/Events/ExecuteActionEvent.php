@@ -23,11 +23,59 @@ class ExecuteActionEvent extends DietcubeEventAbstract
     }
 
     /**
+     * @return Application
+     */
+    public function getApplication()
+    {
+        return $this->app;
+    }
+
+    /**
+     * @param callable $executable
+     */
+    public function setExecutable($executable)
+    {
+        if (!is_callable($executable)) {
+            throw new \InvalidArgumentException("Passed argument for setExecutable is not callable.");
+        }
+        $this->executable = $executable;
+
+        return $this;
+    }
+
+    /**
+     * Set executable by valid handler.
+     * This is a shortcut method to create controller by shorter name.
+     * e.g. User::login
+     *
+     * @param string $handler
+     */
+    public function setExecutableByHandler($handler)
+    {
+        list($controller_name, $action_name) = $this->app->getControllerByHandler($handler);
+        $controller = $this->app->createController($controller_name);
+
+        $this->setExecutable([$controller, $action_name]);
+
+        return $this;
+    }
+
+    /**
      * @return executable
      */
     public function getExecutable()
     {
         return $this->executable;
+    }
+
+    /**
+     * @param array $vars
+     */
+    public function setVars(array $vars)
+    {
+        $this->vars = $vars;
+
+        return $this;
     }
 
     /**
@@ -44,6 +92,8 @@ class ExecuteActionEvent extends DietcubeEventAbstract
     public function setResult($result)
     {
         $this->result = $result;
+
+        return $this;
     }
 
     /**
