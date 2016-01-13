@@ -61,7 +61,7 @@ class ExecuteActionEvent extends DietcubeEventAbstract
     }
 
     /**
-     * @return executable
+     * @return callable executable
      */
     public function getExecutable()
     {
