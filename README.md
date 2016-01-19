@@ -27,10 +27,10 @@ Use Dietcube on your project.
 composer require dietcube/dietcube
 ```
 
-Start project with the skeleton (WIP):
+Start project with the skeleton:
 
 ```
-composer create-project dietcube/dietcube-project
+composer create-project dietcube/dietcube-project -s dev your-project
 ```
 
 License
