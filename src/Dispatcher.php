@@ -231,6 +231,9 @@ class Dispatcher
         } else {
             list($controller_name, $action_name) = $this->app->getControllerByHandler($handler);
 
+            if (!class_exists($controller_name)) {
+                throw new DCException("Controller {$controller_name} is not exists.");
+            }
             $controller = $this->app->createController($controller_name);
             $executable = [$controller, $action_name];
         }
