@@ -145,7 +145,7 @@ class Dispatcher
     /**
      * @return Response
      */
-    protected function prepareReponse()
+    protected function prepareResponse()
     {
         $response = new Response();
         $this->container['response'] = $response;
@@ -163,7 +163,7 @@ class Dispatcher
         $debug = $container['app.config']->get('debug');
 
         // prepare handle request
-        $response = $this->prepareReponse();
+        $response = $this->prepareResponse();
 
         $method = $container['global.server']->get('REQUEST_METHOD');
         $path = $container['app']->getPath();
@@ -192,7 +192,7 @@ class Dispatcher
     {
         $logger = $this->container['logger'];
         if (!isset($this->container['response'])) {
-            $response = $this->prepareReponse();
+            $response = $this->prepareResponse();
         } else {
             $response = $this->container['response'];
         }
