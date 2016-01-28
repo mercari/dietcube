@@ -30,7 +30,7 @@ composer require dietcube/dietcube
 Start project with the skeleton:
 
 ```
-composer create-project dietcube/dietcube-project -s dev your-project
+composer create-project dietcube/project -s dev your-project
 ```
 
 License
