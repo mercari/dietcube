@@ -76,7 +76,10 @@ class Controller
 
     protected function redirect($uri, $code = 302)
     {
-        $this->getResponse()->setHeader('Location', $uri, $code);
+        $response = $this->getResponse();
+
+        $response->setStatusCode($code);
+        $response->setHeader('Location', $uri);
 
         return null;
     }
