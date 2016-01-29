@@ -12,9 +12,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "5.1.x",
-        "fabpot/php-cs-fixer": "1.x",
-        "phpunit/php-code-coverage": "3.x",
-        "piece/stagehand-testrunner": "4.1.x"
+        "fabpot/php-cs-fixer": "1.11.x",
+        "phpunit/php-code-coverage": "3.1.x"
     },
     "scripts": {
       "test": "phpunit",
