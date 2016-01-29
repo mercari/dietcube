@@ -148,6 +148,7 @@ class Dispatcher
     protected function prepareResponse()
     {
         $response = new Response();
+        $response->setLogger($this->container['logger']);
         $this->container['response'] = $response;
 
         return $response;

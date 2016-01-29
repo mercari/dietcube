@@ -7,8 +7,12 @@
 
 namespace Dietcube;
 
+use Dietcube\Components\LoggerAwareTrait;
+
 class Response
 {
+    use LoggerAwareTrait;
+
     /** @const array Map of standard HTTP status code/reason phrases */
     const PHRASES = [
         100 => 'Continue',
