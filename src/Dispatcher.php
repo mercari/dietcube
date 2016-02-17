@@ -14,7 +14,6 @@ use Dietcube\Events\FinishRequestEvent;
 use Dietcube\Exception\DCException;
 use Dietcube\Exception\HttpNotFoundException;
 use Dietcube\Exception\HttpMethodNotAllowedException;
-use Dietcube\Exception\HttpErrorException;
 use Dietcube\Twig\DietcubeExtension;
 use Pimple\Container;
 use FastRoute\Dispatcher as RouteDispatcher;
@@ -160,8 +159,6 @@ class Dispatcher
     public function handleRequest()
     {
         $container = $this->container;
-        $logger = $container['logger'];
-        $debug = $container['app.config']->get('debug');
 
         // prepare handle request
         $response = $this->prepareResponse();
@@ -186,7 +183,7 @@ class Dispatcher
     }
 
     /**
-     * @params \Exception $errors
+     * @param \Exception $errors
      * @return Response
      */
     public function handleError(\Exception $errors)
@@ -262,7 +259,7 @@ class Dispatcher
             }
         }
 
-        $logger->debug('Exceute action.', ['controller' => $controller_name, 'action' => $action_name, 'vars' => $vars]);
+        $logger->debug('Execute action.', ['controller' => $controller_name, 'action' => $action_name, 'vars' => $vars]);
         return call_user_func_array($executable, $vars);
     }
 
@@ -275,7 +272,11 @@ class Dispatcher
     }
 
     /**
-     * Dispatche router with HTTP request information.
+     * Dispatch router with HTTP request information.
+     *
+     * @param $method
+     * @param $path
+     * @return array
      */
     protected function dispatchRouter($method, $path)
     {
@@ -318,7 +319,7 @@ class Dispatcher
             return [$error_controller, Controller::ACTION_METHOD_NOT_ALLOWED];
         }
 
-        // Do internalError acition for any errors.
+        // Do internalError action for any errors.
         return [$error_controller, Controller::ACTION_INTERNAL_ERROR];
     }
 
@@ -374,7 +375,7 @@ class Dispatcher
         try {
             $response = $dispatcher->handleRequest();
         } catch (\Exception $e) {
-            // Please handle errors occured on executing Dispatcher::handleError with your web server.
+            // Please handle errors occurred on executing Dispatcher::handleError with your web server.
             // Dietcube doesn't care these errors.
             $response = $dispatcher->handleError($e);
         }
