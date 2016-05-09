@@ -15,6 +15,7 @@ use Dietcube\Exception\DCException;
 use Dietcube\Exception\HttpNotFoundException;
 use Dietcube\Exception\HttpMethodNotAllowedException;
 use Dietcube\Twig\DietcubeExtension;
+use Monolog\Formatter\FormatterInterface;
 use Pimple\Container;
 use FastRoute\Dispatcher as RouteDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -60,7 +61,8 @@ class Dispatcher
 
         $this->container['logger'] = $logger = $this->createLogger(
             $config->get('logger.path'),
-            $config->get('logger.level', Logger::WARNING)
+            $config->get('logger.level', Logger::WARNING),
+            $config->get('logger.formatter')
         );
 
         $logger->debug('Application booted. env={env}', ['env' => $this->app->getEnv()]);
@@ -85,18 +87,26 @@ class Dispatcher
         $this->event_dispatcher->dispatch(DietcubeEvents::BOOT, new BootEvent($this->app));
     }
 
-    protected function createLogger($path, $level = Logger::WARNING)
+    protected function createLogger($path, $level = Logger::WARNING, FormatterInterface $formatter = null)
     {
         $logger = new Logger('app');
         $logger->pushProcessor(new PsrLogMessageProcessor);
 
         if (is_writable($path) || is_writable(dirname($path))) {
-            $logger->pushHandler(new StreamHandler($path, $level));
+            $handler = new StreamHandler($path, $level);
+            if ($formatter !== null) {
+                $handler->setFormatter($formatter);
+            }
+            $logger->pushHandler($handler);
         } else {
             if ($this->app->isDebug()) {
                 throw new DCException("Log path '{$path}' is not writable. Make sure your logger.path of config.");
             }
-            $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level));
+            $handler = new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level);
+            if ($formatter !== null) {
+                $handler->setFormatter($formatter);
+            }
+            $logger->pushHandler($handler);
             $logger->warning("Log path '{$path}' is not writable. Make sure your logger.path of config.");
             $logger->warning("error_log() is used for application logger instead at this time.");
         }
