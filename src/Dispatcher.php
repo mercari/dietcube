@@ -15,7 +15,6 @@ use Dietcube\Exception\DCException;
 use Dietcube\Exception\HttpNotFoundException;
 use Dietcube\Exception\HttpMethodNotAllowedException;
 use Dietcube\Twig\DietcubeExtension;
-use Monolog\Formatter\FormatterInterface;
 use Pimple\Container;
 use FastRoute\Dispatcher as RouteDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcher;
