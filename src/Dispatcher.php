@@ -59,11 +59,15 @@ class Dispatcher
         $this->app->setContainer($container);
         $config = $this->container['app.config'] = $this->app->getConfig();
 
-        $this->container['logger'] = $logger = $this->createLogger(
-            $config->get('logger.path'),
-            $config->get('logger.level', Logger::WARNING),
-            $config->get('logger.formatter')
-        );
+        $logger = $config->get('logger.logger');
+        if ($logger instanceof \Psr\Log\LoggerInterface) {
+            $this->container['logger'] = $logger;
+        } else {
+            $this->container['logger'] = $logger = $this->createLogger(
+                $config->get('logger.path'),
+                $config->get('logger.level', Logger::WARNING)
+            );
+        }
 
         $logger->debug('Application booted. env={env}', ['env' => $this->app->getEnv()]);
         $logger->debug('Config file loaded. config_files={files}', ['files' => implode(',', $this->app->getConfigFiles())]);
@@ -87,26 +91,18 @@ class Dispatcher
         $this->event_dispatcher->dispatch(DietcubeEvents::BOOT, new BootEvent($this->app));
     }
 
-    protected function createLogger($path, $level = Logger::WARNING, FormatterInterface $formatter = null)
+    protected function createLogger($path, $level = Logger::WARNING)
     {
         $logger = new Logger('app');
         $logger->pushProcessor(new PsrLogMessageProcessor);
 
         if (is_writable($path) || is_writable(dirname($path))) {
-            $handler = new StreamHandler($path, $level);
-            if ($formatter !== null) {
-                $handler->setFormatter($formatter);
-            }
-            $logger->pushHandler($handler);
+            $logger->pushHandler(new StreamHandler($path, $level));
         } else {
             if ($this->app->isDebug()) {
                 throw new DCException("Log path '{$path}' is not writable. Make sure your logger.path of config.");
             }
-            $handler = new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level);
-            if ($formatter !== null) {
-                $handler->setFormatter($formatter);
-            }
-            $logger->pushHandler($handler);
+            $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level));
             $logger->warning("Log path '{$path}' is not writable. Make sure your logger.path of config.");
             $logger->warning("error_log() is used for application logger instead at this time.");
         }
