@@ -57,7 +57,7 @@ abstract class Application
         foreach ($this->getConfigFiles() as $config_file) {
             $load_config_file = $this->getConfigDir() . '/' .  $config_file;
             if (!file_exists($load_config_file)) {
-                continue;
+                throw new DCException('config file not found :' . $load_config_file);
             }
 
             $config = array_merge($config, require $load_config_file);
