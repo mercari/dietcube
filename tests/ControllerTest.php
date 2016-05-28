@@ -63,8 +63,6 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
     public function testSetVars()
     {
         $app = $this->getMockBuilder('\Dietcube\Application')->disableOriginalConstructor()->getMockForAbstractClass();
-        $app->expects($this->any())->method('getTemplateExt')->will($this->returnValue('.html.twig'));
-
         $renderer = $this->getMock('Twig_Environment');
         $renderer->expects($this->any())->method('render')->will($this->returnArgument(1));
 
@@ -83,7 +81,6 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
     public function testRenderVars()
     {
         $app = $this->getMockBuilder('\Dietcube\Application')->disableOriginalConstructor()->getMockForAbstractClass();
-        $app->expects($this->any())->method('getTemplateExt')->will($this->returnValue('.html.twig'));
 
         $renderer = $this->getMock('Twig_Environment');
         $renderer->expects($this->any())->method('render')->will($this->returnArgument(1));
