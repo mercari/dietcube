@@ -58,10 +58,15 @@ class Dispatcher
         $this->app->setContainer($container);
         $config = $this->container['app.config'] = $this->app->getConfig();
 
-        $this->container['logger'] = $logger = $this->createLogger(
-            $config->get('logger.path'),
-            $config->get('logger.level', Logger::WARNING)
-        );
+        $logger = $config->get('logger.logger');
+        if ($logger instanceof \Psr\Log\LoggerInterface) {
+            $this->container['logger'] = $logger;
+        } else {
+            $this->container['logger'] = $logger = $this->createLogger(
+                $config->get('logger.path'),
+                $config->get('logger.level', Logger::WARNING)
+            );
+        }
 
         $logger->debug('Application booted. env={env}', ['env' => $this->app->getEnv()]);
         $logger->debug('Config file loaded. config_files={files}', ['files' => implode(',', $this->app->getConfigFiles())]);
