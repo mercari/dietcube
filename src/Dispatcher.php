@@ -20,9 +20,6 @@ use FastRoute\Dispatcher as RouteDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use Monolog\Handler\ErrorLogHandler;
-use Monolog\Processor\PsrLogMessageProcessor;
 
 class Dispatcher
 {
@@ -58,7 +55,7 @@ class Dispatcher
         $this->app->setContainer($container);
         $config = $this->container['app.config'] = $this->app->getConfig();
 
-        $this->container['logger'] = $logger = $this->createLogger(
+        $this->container['logger'] = $logger = $this->app->createLogger(
             $config->get('logger.path'),
             $config->get('logger.level', Logger::WARNING)
         );
@@ -83,25 +80,6 @@ class Dispatcher
         $this->app->config($this->container);
 
         $this->event_dispatcher->dispatch(DietcubeEvents::BOOT, new BootEvent($this->app));
-    }
-
-    protected function createLogger($path, $level = Logger::WARNING)
-    {
-        $logger = new Logger('app');
-        $logger->pushProcessor(new PsrLogMessageProcessor);
-
-        if (is_writable($path) || is_writable(dirname($path))) {
-            $logger->pushHandler(new StreamHandler($path, $level));
-        } else {
-            if ($this->app->isDebug()) {
-                throw new DCException("Log path '{$path}' is not writable. Make sure your logger.path of config.");
-            }
-            $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level));
-            $logger->warning("Log path '{$path}' is not writable. Make sure your logger.path of config.");
-            $logger->warning("error_log() is used for application logger instead at this time.");
-        }
-
-        return $logger;
     }
 
     protected function createRenderer()
