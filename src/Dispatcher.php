@@ -74,7 +74,9 @@ class Dispatcher
         }
 
         if (!isset($this->container['app.renderer'])) {
-            $this->container['app.renderer'] = $this->createRenderer();
+            $this->container['app.renderer'] = function () {
+                return $this->createRenderer();
+            };
         }
 
         $this->app->config($this->container);
