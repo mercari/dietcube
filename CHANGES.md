@@ -1,6 +1,12 @@
 CHANGES
 ===========
 
+1.0.2
+-----------
+
+* Create logger in Application (not in Dispatcher)
+* Create renderer object when it is needed.
+* Includes fixes a little bugs and refactors.
 
 1.0.1
 -----------
