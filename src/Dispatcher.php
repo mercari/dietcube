@@ -199,9 +199,9 @@ class Dispatcher
         }
 
         $action_result = "";
-        if ($this->app->isDebug()) {
-            $logger->error('Error occurred. (This log is debug mode only) ', ['error' => get_class($errors), 'message' => $errors->getMessage()]);
 
+        $logger->error('Error occurred. ', ['error' => get_class($errors), 'message' => $errors->getMessage()]);
+        if ($this->app->isDebug()) {
             $debug_controller = isset($this->container['app.debug_controller'])
                 ? $this->container['app.debug_controller']
                 : __NAMESPACE__ . '\\Controller\\DebugController';
@@ -210,7 +210,6 @@ class Dispatcher
             // FIXME: debug controller method name?
             $action_result = $this->executeAction([$controller, 'dumpErrors'], ['errors' => $errors], $fire_events = false);
         } else {
-            $logger->info('Error occurred. ', ['error' => get_class($errors), 'message' => $errors->getMessage()]);
             list($controller_name, $action_name) = $this->detectErrorAction($errors);
             $controller = $this->app->createController($controller_name);
 
