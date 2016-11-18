@@ -177,7 +177,11 @@ class Dispatcher
 
         $action_result = "";
 
-        $logger->error('Error occurred. ', ['error' => get_class($errors), 'message' => $errors->getMessage()]);
+        $logger->error('Error occurred. ', [
+            'error'     => get_class($errors),
+            'message'   => $errors->getMessage(),
+            'trace'      => $errors->getTrace(),
+        ]);
         if ($this->app->isDebug()) {
             $debug_controller = isset($this->container['app.debug_controller'])
                 ? $this->container['app.debug_controller']
