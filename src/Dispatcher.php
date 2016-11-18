@@ -180,7 +180,7 @@ class Dispatcher
         $logger->error('Error occurred. ', [
             'error'     => get_class($errors),
             'message'   => $errors->getMessage(),
-            'trace'      => $errors->getTrace(),
+            'trace'     => $errors->getTraceAsString(),
         ]);
         if ($this->app->isDebug()) {
             $debug_controller = isset($this->container['app.debug_controller'])
