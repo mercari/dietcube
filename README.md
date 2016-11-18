@@ -33,6 +33,14 @@ Start project with the skeleton:
 composer create-project dietcube/project -s dev your-project
 ```
 
+Contribution
+---------
+
+Please read the CLA below carefully before submitting your contribution.
+
+https://www.mercari.com/cla/
+
+
 License
 ---------
 

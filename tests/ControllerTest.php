@@ -59,4 +59,52 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
         }
         return $container;
     }
+
+    public function testSetVars()
+    {
+        $app = $this->getMockBuilder('\Dietcube\Application')->disableOriginalConstructor()->getMockForAbstractClass();
+        $renderer = $this->getMock('Twig_Environment');
+        $renderer->expects($this->any())->method('render')->will($this->returnArgument(1));
+
+        $container = self::getContainerAsFixture(['app' => $app, 'app.renderer' => $renderer]);
+        $controller = new Controller($container);
+
+        $controller->setVars('foo', 'bar');
+        $render = $this->getInvokableMethod('render');
+
+        $this->assertEquals(['foo' => 'bar'], $render->invokeArgs($controller, ['template']));
+
+        $controller->setVars(['foo' => 'baz']);
+        $this->assertEquals(['foo' => 'baz'], $render->invokeArgs($controller, ['template']));
+    }
+
+    public function testRenderVars()
+    {
+        $app = $this->getMockBuilder('\Dietcube\Application')->disableOriginalConstructor()->getMockForAbstractClass();
+
+        $renderer = $this->getMock('Twig_Environment');
+        $renderer->expects($this->any())->method('render')->will($this->returnArgument(1));
+
+        $container = self::getContainerAsFixture(['app' => $app, 'app.renderer' => $renderer]);
+        $controller = new Controller($container);
+
+        $controller->setVars('key', 'value');
+        $render = $this->getInvokableMethod('render');
+
+        $this->assertEquals(['key' => 'value'], $render->invokeArgs($controller, ['template']));
+        $this->assertEquals(['key' => 'value2'], $render->invokeArgs($controller, ['template', ['key' => 'value2']]));
+    }
+
+    public function testFindTemplate()
+    {
+        $app = $this->getMockBuilder('Dietcube\Application')->disableOriginalConstructor()->getMock();
+        $app->expects($this->atLeastOnce())->method('getTemplateExt')->will($this->returnValue('.html.jinja2'));
+
+        $container = self::getContainerAsFixture(['app' => $app]);
+        $controller = new Controller($container);
+        $findTemplate = $this->getInvokableMethod('findTemplate');
+
+        $this->assertEquals('template.html.jinja2', $findTemplate->invokeArgs($controller, ['template']));
+        $this->assertEquals('index.html.jinja2', $findTemplate->invokeArgs($controller, ['index']));
+    }
 }

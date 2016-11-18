@@ -14,16 +14,12 @@ use Dietcube\Events\FinishRequestEvent;
 use Dietcube\Exception\DCException;
 use Dietcube\Exception\HttpNotFoundException;
 use Dietcube\Exception\HttpMethodNotAllowedException;
-use Dietcube\Exception\HttpErrorException;
 use Dietcube\Twig\DietcubeExtension;
 use Pimple\Container;
 use FastRoute\Dispatcher as RouteDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use Monolog\Handler\ErrorLogHandler;
-use Monolog\Processor\PsrLogMessageProcessor;
 
 class Dispatcher
 {
@@ -59,7 +55,7 @@ class Dispatcher
         $this->app->setContainer($container);
         $config = $this->container['app.config'] = $this->app->getConfig();
 
-        $this->container['logger'] = $logger = $this->createLogger(
+        $this->container['logger'] = $logger = $this->app->createLogger(
             $config->get('logger.path'),
             $config->get('logger.level', Logger::WARNING)
         );
@@ -78,31 +74,14 @@ class Dispatcher
         }
 
         if (!isset($this->container['app.renderer'])) {
-            $this->container['app.renderer'] = $this->createRenderer();
+            $this->container['app.renderer'] = function () {
+                return $this->createRenderer();
+            };
         }
 
         $this->app->config($this->container);
 
         $this->event_dispatcher->dispatch(DietcubeEvents::BOOT, new BootEvent($this->app));
-    }
-
-    protected function createLogger($path, $level = Logger::WARNING)
-    {
-        $logger = new Logger('app');
-        $logger->pushProcessor(new PsrLogMessageProcessor);
-
-        if (is_writable($path) || is_writable(dirname($path))) {
-            $logger->pushHandler(new StreamHandler($path, $level));
-        } else {
-            if ($this->app->isDebug()) {
-                throw new DCException("Log path '{$path}' is not writable. Make sure your logger.path of config.");
-            }
-            $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level));
-            $logger->warning("Log path '{$path}' is not writable. Make sure your logger.path of config.");
-            $logger->warning("error_log() is used for application logger instead at this time.");
-        }
-
-        return $logger;
     }
 
     protected function createRenderer()
@@ -160,8 +139,6 @@ class Dispatcher
     public function handleRequest()
     {
         $container = $this->container;
-        $logger = $container['logger'];
-        $debug = $container['app.config']->get('debug');
 
         // prepare handle request
         $response = $this->prepareResponse();
@@ -186,7 +163,7 @@ class Dispatcher
     }
 
     /**
-     * @params \Exception $errors
+     * @param \Exception $errors
      * @return Response
      */
     public function handleError(\Exception $errors)
@@ -199,9 +176,9 @@ class Dispatcher
         }
 
         $action_result = "";
-        if ($this->app->isDebug()) {
-            $logger->error('Error occurred. (This log is debug mode only) ', ['error' => get_class($errors), 'message' => $errors->getMessage()]);
 
+        $logger->error('Error occurred. ', ['error' => get_class($errors), 'message' => $errors->getMessage()]);
+        if ($this->app->isDebug()) {
             $debug_controller = isset($this->container['app.debug_controller'])
                 ? $this->container['app.debug_controller']
                 : __NAMESPACE__ . '\\Controller\\DebugController';
@@ -210,7 +187,6 @@ class Dispatcher
             // FIXME: debug controller method name?
             $action_result = $this->executeAction([$controller, 'dumpErrors'], ['errors' => $errors], $fire_events = false);
         } else {
-            $logger->info('Error occurred. ', ['error' => get_class($errors), 'message' => $errors->getMessage()]);
             list($controller_name, $action_name) = $this->detectErrorAction($errors);
             $controller = $this->app->createController($controller_name);
 
@@ -262,7 +238,7 @@ class Dispatcher
             }
         }
 
-        $logger->debug('Exceute action.', ['controller' => $controller_name, 'action' => $action_name, 'vars' => $vars]);
+        $logger->debug('Execute action.', ['controller' => $controller_name, 'action' => $action_name, 'vars' => $vars]);
         return call_user_func_array($executable, $vars);
     }
 
@@ -275,7 +251,11 @@ class Dispatcher
     }
 
     /**
-     * Dispatche router with HTTP request information.
+     * Dispatch router with HTTP request information.
+     *
+     * @param $method
+     * @param $path
+     * @return array
      */
     protected function dispatchRouter($method, $path)
     {
@@ -318,7 +298,7 @@ class Dispatcher
             return [$error_controller, Controller::ACTION_METHOD_NOT_ALLOWED];
         }
 
-        // Do internalError acition for any errors.
+        // Do internalError action for any errors.
         return [$error_controller, Controller::ACTION_INTERNAL_ERROR];
     }
 
@@ -374,7 +354,7 @@ class Dispatcher
         try {
             $response = $dispatcher->handleRequest();
         } catch (\Exception $e) {
-            // Please handle errors occured on executing Dispatcher::handleError with your web server.
+            // Please handle errors occurred on executing Dispatcher::handleError with your web server.
             // Dietcube doesn't care these errors.
             $response = $dispatcher->handleError($e);
         }
