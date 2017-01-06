@@ -7,7 +7,7 @@ namespace Dietcube\Controller;
 
 interface ErrorControllerInterface
 {
-    public function notFound();
+    public function notFound(\Exception $error);
 
     public function methodNotAllowed();
 

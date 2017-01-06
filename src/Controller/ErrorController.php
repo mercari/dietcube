@@ -9,10 +9,10 @@ use Dietcube\Controller;
 
 class ErrorController extends Controller implements ErrorControllerInterface
 {
-    public function notFound()
+    public function notFound(\Exception $error)
     {
         $this->getResponse()->setStatusCode(404);
-        return $this->render('error404');
+        return $this->render('error404', ['error' => $error]);
     }
 
     public function methodNotAllowed()
