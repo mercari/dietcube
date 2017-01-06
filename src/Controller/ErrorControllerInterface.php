@@ -9,7 +9,7 @@ interface ErrorControllerInterface
 {
     public function notFound(\Exception $error);
 
-    public function methodNotAllowed();
+    public function methodNotAllowed(\Exception $error);
 
     public function internalError(\Exception $error);
 }

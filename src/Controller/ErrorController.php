@@ -15,10 +15,10 @@ class ErrorController extends Controller implements ErrorControllerInterface
         return $this->render('error404', ['error' => $error]);
     }
 
-    public function methodNotAllowed()
+    public function methodNotAllowed(\Exception $error)
     {
         $this->getResponse()->setStatusCode(403);
-        return $this->render('error403');
+        return $this->render('error403', ['error' => $error]);
     }
 
     public function internalError(\Exception $error)
