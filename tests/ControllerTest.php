@@ -5,12 +5,13 @@
 
 namespace Dietcube;
 
+use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 
 /**
  * @backupGlobals
  */
-class ControllerTest extends \PHPUnit_Framework_TestCase
+class ControllerTest extends TestCase
 {
     public function testGetContainerValue()
     {

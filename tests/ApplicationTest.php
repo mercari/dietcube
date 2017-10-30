@@ -5,12 +5,13 @@
 
 namespace Dietcube;
 
+use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 
 /**
  * @backupGlobals
  */
-class ApplicationTest extends \PHPUnit_Framework_TestCase
+class ApplicationTest extends TestCase
 {
     public function testInstantiate()
     {
