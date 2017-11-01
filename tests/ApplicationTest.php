@@ -49,6 +49,13 @@ class ApplicationTest extends TestCase
         $this->assertEquals(__DIR__ . '/config', $app->getConfigDir());
         $this->assertEquals(dirname(__DIR__) . '/tmp', $app->getTmpDir());
     }
+
+    public function testSetDir()
+    {
+        $app = new MockApplication('', '');
+        $app->setDir('tmp', '/var/tmp');
+        $this->assertSame($app->getTmpDir(), '/var/tmp');
+    }
 }
 
 class MockApplication extends Application
