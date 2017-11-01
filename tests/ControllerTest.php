@@ -5,12 +5,13 @@
 
 namespace Dietcube;
 
+use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 
 /**
  * @backupGlobals
  */
-class ControllerTest extends \PHPUnit_Framework_TestCase
+class ControllerTest extends TestCase
 {
     public function testGetContainerValue()
     {
@@ -63,7 +64,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
     public function testSetVars()
     {
         $app = $this->getMockBuilder('\Dietcube\Application')->disableOriginalConstructor()->getMockForAbstractClass();
-        $renderer = $this->getMock('Twig_Environment');
+        $renderer = $this->createMock('Twig_Environment');
         $renderer->expects($this->any())->method('render')->will($this->returnArgument(1));
 
         $container = self::getContainerAsFixture(['app' => $app, 'app.renderer' => $renderer]);
@@ -82,7 +83,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
     {
         $app = $this->getMockBuilder('\Dietcube\Application')->disableOriginalConstructor()->getMockForAbstractClass();
 
-        $renderer = $this->getMock('Twig_Environment');
+        $renderer = $this->createMock('Twig_Environment');
         $renderer->expects($this->any())->method('render')->will($this->returnArgument(1));
 
         $container = self::getContainerAsFixture(['app' => $app, 'app.renderer' => $renderer]);
