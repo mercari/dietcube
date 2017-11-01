@@ -3,8 +3,9 @@
 namespace Dietcube;
 
 use Pimple\Container;
+use PHPUnit\Framework\TestCase;
 
-class RouterTest extends \PHPUnit_Framework_TestCase
+class RouterTest extends TestCase
 {
     public function testDispatchPageFound()
     {
