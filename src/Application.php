@@ -121,7 +121,7 @@ abstract class Application
 
     public function setDir($dirname, $path)
     {
-        $this->dir[$dirname] = $path;
+        $this->dirs[$dirname] = $path;
     }
 
     public function getHost()
