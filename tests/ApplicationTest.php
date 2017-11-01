@@ -5,12 +5,13 @@
 
 namespace Dietcube;
 
+use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 
 /**
  * @backupGlobals
  */
-class ApplicationTest extends \PHPUnit_Framework_TestCase
+class ApplicationTest extends TestCase
 {
     public function testInstantiate()
     {
@@ -24,7 +25,8 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(__DIR__, $app->getAppRoot());
         $this->assertEquals('development', $app->getEnv());
-        $this->assertEquals([
+        $this->assertEquals(
+            [
                 'config.php',
                 'config_development.php',
             ],

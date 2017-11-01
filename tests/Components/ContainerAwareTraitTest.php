@@ -5,9 +5,11 @@
 
 namespace Dietcube\Components;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  */
-class ContainerAwareTraitTest extends \PHPUnit_Framework_TestCase
+class ContainerAwareTraitTest extends TestCase
 {
     public function testToGetContainer()
     {

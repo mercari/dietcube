@@ -5,12 +5,13 @@
 
 namespace Dietcube\Components;
 
+use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 
 /**
  * @backupGlobals
  */
-class ArrayResourceTraitTest extends \PHPUnit_Framework_TestCase
+class ArrayResourceTraitTest extends TestCase
 {
     public function testGetAndSet()
     {

@@ -5,9 +5,11 @@
 
 namespace Dietcube\Components;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  */
-class LoggerAwareTraitTest extends \PHPUnit_Framework_TestCase
+class LoggerAwareTraitTest extends TestCase
 {
     public function testInstanciate()
     {
