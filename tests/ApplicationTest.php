@@ -25,7 +25,8 @@ class ApplicationTest extends TestCase
 
         $this->assertEquals(__DIR__, $app->getAppRoot());
         $this->assertEquals('development', $app->getEnv());
-        $this->assertEquals([
+        $this->assertEquals(
+            [
                 'config.php',
                 'config_development.php',
             ],
