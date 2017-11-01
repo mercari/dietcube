@@ -86,6 +86,9 @@ class Response
 
     protected $headers = [];
 
+    /** @var string  */
+    protected $version;
+
     public function __construct($status_code = 200, $headers = [], $body = null, $version = "1.1")
     {
         $this->status_code = $status_code;
