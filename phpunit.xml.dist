@@ -1,16 +1,15 @@
 <phpunit
     bootstrap="./tests/bootstrap.php"
-    addUncoveredFilesFromWhitelist="true"
-    processUncoveredFilesFromWhitelist="true"
-    stopOnFailure="false"
-    colors="auto">
+    stopOnFailure="false">
     <testsuites>
-        <testsuite>
+        <testsuite name="test">
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
     <filter>
-      <whitelist processUncoveredFilesFromWhitelist="true">
+      <whitelist
+        addUncoveredFilesFromWhitelist="true"
+        processUncoveredFilesFromWhitelist="true">
         <directory suffix=".php">./src</directory>
         <exclude>
           <directory suffix=".php">./tests</directory>
@@ -19,7 +18,7 @@
       </whitelist>
     </filter>
     <logging>
-        <log type="junit" target="build/junit/junit.xml" logIncompleteSkipped="false"/>
+        <log type="junit" target="build/junit/junit.xml" />
         <log type="coverage-clover" target="build/coverage/clover.xml"/>
         <log type="coverage-html" target="build/coverage/html/"/>
         <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/>
