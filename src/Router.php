@@ -155,7 +155,7 @@ class Router
     {
         $this->named_routes = [];
         foreach ($this->routes as $route) {
-            foreach ($route->definition($this->container) as list($method, $route_name, $handler_name)) {
+            foreach ($route->definition($this->container) as [$method, $route_name, $handler_name]) {
                 if ($handler_name) {
                     $this->named_routes[$handler_name] = $route_name;
                 }

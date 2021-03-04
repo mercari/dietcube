@@ -205,7 +205,7 @@ class Dispatcher
         if (is_callable($handler)) {
             $executable = $handler;
         } else {
-            list($controller_name, $action_name) = $this->app->getControllerByHandler($handler);
+            [$controller_name, $action_name] = $this->app->getControllerByHandler($handler);
 
             if (!class_exists($controller_name)) {
                 throw new DCException("Controller {$controller_name} is not exists.");
