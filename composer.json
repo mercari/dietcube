@@ -4,7 +4,7 @@
     "license": "MIT",
     "require": {
         "nikic/fast-route": "0.7.x",
-        "twig/twig": "1.23.x",
+        "twig/twig": "3.3.x",
         "pimple/pimple": "3.0.x",
         "psr/log": "1.0.0",
         "monolog/monolog": "1.17.x",
