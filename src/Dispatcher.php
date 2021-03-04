@@ -46,7 +46,7 @@ class Dispatcher
         $this->app = $app;
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->app->loadConfig();
 
@@ -87,7 +87,7 @@ class Dispatcher
         $this->event_dispatcher->dispatch(DietcubeEvents::BOOT, new BootEvent($this->app));
     }
 
-    protected function createRenderer()
+    protected function createRenderer(): Environment
     {
         $config = $this->container['app.config'];
         $loader = new FilesystemLoader($this->app->getTemplateDir());
@@ -115,7 +115,7 @@ class Dispatcher
         return $twig;
     }
 
-    protected function bootGlobals()
+    protected function bootGlobals(): void
     {
         $this->container['global.server'] = new Parameters($_SERVER);
         $this->container['global.get']    = new Parameters($_GET);
@@ -124,10 +124,7 @@ class Dispatcher
         $this->container['global.cookie'] = new Parameters($_COOKIE);
     }
 
-    /**
-     * @return Response
-     */
-    protected function prepareResponse()
+    protected function prepareResponse(): Response
     {
         $response = new Response();
         $response->setLogger($this->container['logger']);
@@ -136,10 +133,7 @@ class Dispatcher
         return $response;
     }
 
-    /**
-     * @return Response
-     */
-    public function handleRequest()
+    public function handleRequest(): Response
     {
         $container = $this->container;
 
@@ -149,7 +143,7 @@ class Dispatcher
         $method = $container['global.server']->get('REQUEST_METHOD');
         $path = $container['app']->getPath();
         $this->event_dispatcher->addListener(DietcubeEvents::ROUTING, function (Event $event) use ($method, $path) {
-            list($handler, $vars) = $this->dispatchRouter($method, $path);
+            [$handler, $vars] = $this->dispatchRouter($method, $path);
 
             $event->setRouteInfo($handler, $vars);
         });
@@ -157,7 +151,7 @@ class Dispatcher
         $event = new RoutingEvent($this->app, $container['router']);
         $this->event_dispatcher->dispatch(DietcubeEvents::ROUTING, $event);
 
-        list($handler, $vars) = $event->getRouteInfo();
+        [$handler, $vars] = $event->getRouteInfo();
 
         $action_result = $this->executeAction($handler, $vars);
         $response = $response->setBody($action_result);
@@ -165,11 +159,7 @@ class Dispatcher
         return $this->filterResponse($response);
     }
 
-    /**
-     * @param \Exception $errors
-     * @return Response
-     */
-    public function handleError(\Exception $errors)
+    public function handleError(\Exception $errors): Response
     {
         $logger = $this->container['logger'];
         if (!isset($this->container['response'])) {
@@ -178,23 +168,19 @@ class Dispatcher
             $response = $this->container['response'];
         }
 
-        $action_result = "";
-
         $logger->error('Error occurred. ', [
             'error'     => get_class($errors),
             'message'   => $errors->getMessage(),
             'trace'     => $errors->getTraceAsString(),
         ]);
         if ($this->app->isDebug()) {
-            $debug_controller = isset($this->container['app.debug_controller'])
-                ? $this->container['app.debug_controller']
-                : __NAMESPACE__ . '\\Controller\\DebugController';
+            $debug_controller = $this->container['app.debug_controller'] ?? (Controller\DebugController::class);
             $controller = $this->app->createController($debug_controller);
 
             // FIXME: debug controller method name?
             $action_result = $this->executeAction([$controller, 'dumpErrors'], ['errors' => $errors], $fire_events = false);
         } else {
-            list($controller_name, $action_name) = $this->detectErrorAction($errors);
+            [$controller_name, $action_name] = $this->detectErrorAction($errors);
             $controller = $this->app->createController($controller_name);
 
             $action_result = $this->executeAction([$controller, $action_name], ['errors' => $errors], $fire_events = false);
@@ -205,7 +191,13 @@ class Dispatcher
         return $this->filterResponse($response);
     }
 
-    public function executeAction($handler, $vars = [], $fire_events = true)
+    /**
+     * @param mixed $handler
+     * @param array $vars
+     * @param bool $fire_events
+     * @return bool
+     */
+    public function executeAction($handler, $vars = [], $fire_events = true): bool
     {
         $logger = $this->container['logger'];
         $executable = null;
@@ -249,22 +241,19 @@ class Dispatcher
         return call_user_func_array($executable, $vars);
     }
 
-    protected function getErrorController()
+    protected function getErrorController(): string
     {
-        $error_controller = isset($this->container['app.error_controller'])
-            ? $this->container['app.error_controller']
-            : __NAMESPACE__ . '\\Controller\\ErrorController';
-        return $error_controller;
+        return $this->container['app.error_controller'] ?? (Controller\ErrorController::class);
     }
 
     /**
      * Dispatch router with HTTP request information.
      *
-     * @param $method
-     * @param $path
+     * @param mixed $method
+     * @param mixed $path
      * @return array
      */
-    protected function dispatchRouter($method, $path)
+    protected function dispatchRouter($method, $path): array
     {
         $router = $this->container['router'];
         $logger = $this->container['logger'];
@@ -281,11 +270,11 @@ class Dispatcher
         case RouteDispatcher::NOT_FOUND:
             $logger->debug('Routing failed. Not Found.');
             throw new HttpNotFoundException('404 Not Found');
-            break;
+
         case RouteDispatcher::METHOD_NOT_ALLOWED:
             $logger->debug('Routing failed. Method Not Allowd.');
             throw new HttpMethodNotAllowedException('405 Method Not Allowed');
-            break;
+
         case RouteDispatcher::FOUND:
             $handler = $route_info[1];
             $vars = $route_info[2];
@@ -296,7 +285,7 @@ class Dispatcher
         return [$handler, $vars];
     }
 
-    protected function detectErrorAction(\Exception $errors)
+    protected function detectErrorAction(\Exception $errors): array
     {
         $error_controller = $this->getErrorController();
         if ($errors instanceof HttpNotFoundException) {
@@ -315,7 +304,7 @@ class Dispatcher
      * @param Response $response
      * @return Response
      */
-    protected function filterResponse(Response $response)
+    protected function filterResponse(Response $response): Response
     {
         $event = new FilterResponseEvent($this->app, $response);
         $this->event_dispatcher->dispatch(DietcubeEvents::FILTER_RESPONSE, $event);
@@ -329,7 +318,7 @@ class Dispatcher
      * @param Response $response
      * @return Response
      */
-    protected function finishRequest(Response $response)
+    protected function finishRequest(Response $response): Response
     {
         $event = new FinishRequestEvent($this->app, $response);
         $this->event_dispatcher->dispatch(DietcubeEvents::FINISH_REQUEST, $event);
@@ -342,17 +331,27 @@ class Dispatcher
         return $response;
     }
 
-    public static function getEnv($env = 'production')
+    /**
+     * @param string $env
+     * @return array|false|mixed|string
+     */
+    public static function getEnv(string $env = 'production')
     {
         if (isset($_SERVER['DIET_ENV'])) {
-            $env = $_SERVER['DIET_ENV'];
-        } elseif (getenv('DIET_ENV')) {
-            $env = getenv('DIET_ENV');
+            return $_SERVER['DIET_ENV'];
+        }
+        if (getenv('DIET_ENV')) {
+            return getenv('DIET_ENV');
         }
         return $env;
     }
 
-    public static function invoke($app_class, $app_root_dir, $env)
+    /**
+     * @param mixed $app_class
+     * @param mixed $app_root_dir
+     * @param mixed $env
+     */
+    public static function invoke($app_class, $app_root_dir, $env): void
     {
         $app = new $app_class($app_root_dir, $env);
         $dispatcher = new static($app);
