@@ -10,7 +10,6 @@
     </testsuites>
     <logging>
         <junit outputFile="build/junit/junit.xml"/>
-        <text outputFile="php://stdout"/>
     </logging>
     <coverage
             includeUncoveredFiles="true"
