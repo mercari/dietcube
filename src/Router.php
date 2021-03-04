@@ -15,13 +15,16 @@ class Router
      */
     protected $dispatcher;
 
+    /**
+     * @var Container
+     */
     protected $container;
 
-    protected $route_info = null;
+    protected $route_info;
 
-    protected $dispatched_http_method = null;
+    protected $dispatched_http_method;
 
-    protected $dispatched_url = null;
+    protected $dispatched_url;
 
     /**
      * @var RouteInterface[]
@@ -36,15 +39,16 @@ class Router
     }
 
     /**
+     * @param RouteInterface $route
      * @return $this
      */
-    public function addRoute(RouteInterface $route)
+    public function addRoute(RouteInterface $route): self
     {
         $this->routes[] = $route;
         return $this;
     }
 
-    public function init()
+    public function init(): void
     {
         $collector = new RouteCollector(
             new StdRouteParser(),
@@ -52,7 +56,7 @@ class Router
         );
 
         foreach ($this->routes as $route) {
-            foreach ($route->definition($this->container) as list($method, $route_name, $handler_name)) {
+            foreach ($route->definition($this->container) as [$method, $route_name, $handler_name]) {
                 $collector->addRoute($method, $route_name, $handler_name);
             }
         }
@@ -67,7 +71,7 @@ class Router
      * @param string $url
      * @return array
      */
-    public function dispatch($http_method, $url)
+    public function dispatch(string $http_method, string $url): array
     {
         if ($this->dispatcher === null) {
             throw new \RuntimeException('Route dispatcher is not initialized');
@@ -93,7 +97,7 @@ class Router
      * @throws \RuntimeException         If named route does not exist
      * @throws \InvalidArgumentException If required data not provided
      */
-    public function url($handler, array $data = [], array $query_params = [], $is_absolute = false)
+    public function url(string $handler, array $data = [], array $query_params = [], $is_absolute = false): string
     {
         if ($this->named_routes === null) {
             $this->buildNameIndex();
@@ -104,7 +108,7 @@ class Router
         }
 
         $route = $this->named_routes[$handler];
-        $url = preg_replace_callback('/{([^}]+)}/', function ($match) use ($data) {
+        $url = preg_replace_callback('/{([^}]+)}/', static function ($match) use ($data) {
             $segment_name = explode(':', $match[1])[0];
             if (!isset($data[$segment_name])) {
                 throw new \InvalidArgumentException('Missing data for URL segment: ' . $segment_name);
@@ -124,24 +128,30 @@ class Router
     }
 
     /**
-     * @return $this
+     * @return mixed
      */
     public function getRouteInfo()
     {
         return $this->route_info;
     }
 
+    /**
+     * @return mixed
+     */
     public function getDispatchedMethod()
     {
         return $this->dispatched_http_method;
     }
 
+    /**
+     * @return mixed
+     */
     public function getDispatchedUrl()
     {
         return $this->dispatched_url;
     }
 
-    protected function buildNameIndex()
+    protected function buildNameIndex(): void
     {
         $this->named_routes = [];
         foreach ($this->routes as $route) {
