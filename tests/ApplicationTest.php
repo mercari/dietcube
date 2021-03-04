@@ -21,7 +21,7 @@ class ApplicationTest extends TestCase
         $container = new Container();
         $container['global.server'] = new Parameters($_SERVER);
 
-        $app = new MockApplication(__DIR__, 'development');
+        $app = new DummyApplication(__DIR__, 'development');
 
         $this->assertEquals(__DIR__, $app->getAppRoot());
         $this->assertEquals('development', $app->getEnv());
@@ -48,12 +48,5 @@ class ApplicationTest extends TestCase
         $this->assertEquals('.html.twig', $app->getTemplateExt());
         $this->assertEquals(__DIR__ . '/config', $app->getConfigDir());
         $this->assertEquals(dirname(__DIR__) . '/tmp', $app->getTmpDir());
-    }
-}
-
-class MockApplication extends Application
-{
-    public function config(Container $container)
-    {
     }
 }

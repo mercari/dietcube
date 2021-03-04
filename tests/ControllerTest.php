@@ -5,25 +5,27 @@
 
 namespace Dietcube;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
+use Twig\Environment;
 
 /**
  * @backupGlobals
  */
 class ControllerTest extends TestCase
 {
-    public function testGetContainerValue()
+    public function testGetContainerValue(): void
     {
         $hoge = new \StdClass();
         $container = self::getContainerAsFixture(['hoge' => $hoge]);
         $controller = new Controller($container);
 
-        $method = $this->getInvokableMethod('get');
-        $this->assertSame($hoge, $method->invokeArgs($controller, ['hoge']));
+        $method = self::getInvokableMethod('get');
+        self::assertSame($hoge, $method->invokeArgs($controller, ['hoge']));
     }
 
-    public function testIsPostOnPost()
+    public function testIsPostOnPost(): void
     {
         $_SERVER['REQUEST_METHOD'] = 'post';
         $container = self::getContainerAsFixture(['global.server' => new Parameters($_SERVER)]);
@@ -33,25 +35,25 @@ class ControllerTest extends TestCase
         $this->assertTrue($method->invoke($controller));
     }
 
-    public function testIsPostOnGet()
+    public function testIsPostOnGet(): void
     {
         $_SERVER['REQUEST_METHOD'] = 'get';
         $container = self::getContainerAsFixture(['global.server' => new Parameters($_SERVER)]);
         $controller = new Controller($container);
 
-        $method = $this->getInvokableMethod('isPost');
-        $this->assertFalse($method->invoke($controller));
+        $method = self::getInvokableMethod('isPost');
+        self::assertFalse($method->invoke($controller));
     }
 
-    public static function getInvokableMethod($method)
+    public static function getInvokableMethod($method): \ReflectionMethod
     {
-        $class = new \ReflectionClass('\\Dietcube\\Controller');
+        $class = new \ReflectionClass(Controller::class);
         $method = $class->getMethod($method);
         $method->setAccessible(true);
         return $method;
     }
 
-    public static function getContainerAsFixture(array $fixture = [])
+    public static function getContainerAsFixture(array $fixture = []): Container
     {
         $container = new Container();
 
@@ -61,51 +63,63 @@ class ControllerTest extends TestCase
         return $container;
     }
 
-    public function testSetVars()
+    public function testSetVars(): void
     {
-        $app = $this->getMockBuilder('\Dietcube\Application')->disableOriginalConstructor()->getMockForAbstractClass();
-        $renderer = $this->createMock('Twig_Environment');
-        $renderer->expects($this->any())->method('render')->will($this->returnArgument(1));
+        $dummy_template_name = 'dummy';
+        $expected_var_key = 'foo';
+        $expected_var_value = 'bar';
+        $expected_argument_for_render = [$expected_var_key => $expected_var_value];
+
+        $app = new DummyApplication(__DIR__, 'development');
+        $renderer = $this->createMock(Environment::class);
+        // Expectation for arguments on rendered
+        $renderer
+            ->method('render')
+            ->with(
+                self::identicalTo($dummy_template_name . '.html.twig'),
+                self::identicalTo($expected_argument_for_render)
+            )
+            ->willReturn('rendered_dummy');
 
         $container = self::getContainerAsFixture(['app' => $app, 'app.renderer' => $renderer]);
-        $controller = new Controller($container);
+        $controller = new DummyController($container);
 
-        $controller->setVars('foo', 'bar');
-        $render = $this->getInvokableMethod('render');
-
-        $this->assertEquals(['foo' => 'bar'], $render->invokeArgs($controller, ['template']));
-
-        $controller->setVars(['foo' => 'baz']);
-        $this->assertEquals(['foo' => 'baz'], $render->invokeArgs($controller, ['template']));
+        $controller->setVars($expected_var_key, $expected_var_value);
+        self::assertEquals('rendered_dummy', $controller->doRender($dummy_template_name, []));
     }
 
-    public function testRenderVars()
+    public function testRenderVars(): void
     {
-        $app = $this->getMockBuilder('\Dietcube\Application')->disableOriginalConstructor()->getMockForAbstractClass();
+        $dummy_template_name = 'dummy';
+        $expected_var_key = 'key';
+        $expected_var_value = 'value';
+        $expected_argument_for_render = [$expected_var_key => $expected_var_value];
 
-        $renderer = $this->createMock('Twig_Environment');
-        $renderer->expects($this->any())->method('render')->will($this->returnArgument(1));
+        $app = new DummyApplication(__DIR__, 'development');
+        $renderer = $this->createMock(Environment::class);
+        // Expectation for arguments on renderer
+        $renderer
+            ->method('render')
+            ->with(
+                self::identicalTo($dummy_template_name . '.html.twig'),
+                self::identicalTo($expected_argument_for_render)
+            )
+            ->willReturn('rendered_dummy');
 
         $container = self::getContainerAsFixture(['app' => $app, 'app.renderer' => $renderer]);
-        $controller = new Controller($container);
-
-        $controller->setVars('key', 'value');
-        $render = $this->getInvokableMethod('render');
-
-        $this->assertEquals(['key' => 'value'], $render->invokeArgs($controller, ['template']));
-        $this->assertEquals(['key' => 'value2'], $render->invokeArgs($controller, ['template', ['key' => 'value2']]));
+        $controller = new DummyController($container);
+        // Didn't call to `setVars` before render
+        self::assertEquals('rendered_dummy', $controller->doRender($dummy_template_name, $expected_argument_for_render));
     }
 
-    public function testFindTemplate()
+    public function testFindTemplate(): void
     {
-        $app = $this->getMockBuilder('Dietcube\Application')->disableOriginalConstructor()->getMock();
-        $app->expects($this->atLeastOnce())->method('getTemplateExt')->will($this->returnValue('.html.jinja2'));
+        $app = new DummyApplication(__DIR__, 'development');
 
         $container = self::getContainerAsFixture(['app' => $app]);
-        $controller = new Controller($container);
-        $findTemplate = $this->getInvokableMethod('findTemplate');
+        $controller = new DummyController($container);
 
-        $this->assertEquals('template.html.jinja2', $findTemplate->invokeArgs($controller, ['template']));
-        $this->assertEquals('index.html.jinja2', $findTemplate->invokeArgs($controller, ['index']));
+        self::assertEquals('template.html.twig', $controller->doFindTemplate('template'));
+        self::assertEquals('index.html.twig', $controller->doFindTemplate('index'));
     }
 }
