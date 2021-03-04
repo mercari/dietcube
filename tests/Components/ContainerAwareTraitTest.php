@@ -6,14 +6,15 @@
 namespace Dietcube\Components;
 
 use PHPUnit\Framework\TestCase;
+use Pimple\Container;
 
 /**
  */
 class ContainerAwareTraitTest extends TestCase
 {
-    public function testToGetContainer()
+    public function testToGetContainer(): void
     {
-        $container = new \Pimple\Container();
+        $container = new Container();
         $obj = new ConcreteComponentWithContainer();
 
         // not yet set
@@ -28,7 +29,7 @@ class ConcreteComponentWithContainer
 {
     use ContainerAwareTrait;
 
-    public function getContainer()
+    public function getContainer(): ?Container
     {
         return $this->container;
     }

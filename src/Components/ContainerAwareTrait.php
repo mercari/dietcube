@@ -16,8 +16,9 @@ trait ContainerAwareTrait
 
     /**
      * @param Container $container
+     * @return self
      */
-    public function setContainer(Container $container)
+    public function setContainer(Container $container): self
     {
         $this->container = $container;
 
