@@ -14,12 +14,12 @@ class DietcubeExtension extends AbstractExtension
 {
     use ContainerAwareTrait;
 
-    public function getName()
+    public function getName(): string
     {
         return 'dietcube';
     }
 
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('url', [$this, 'url']),
@@ -36,7 +36,7 @@ class DietcubeExtension extends AbstractExtension
      * @param bool $is_absolute
      * @return string url
      */
-    public function url($handler, array $data = [], array $query_params = [], $is_absolute = false)
+    public function url(string $handler, array $data = [], array $query_params = [], $is_absolute = false): string
     {
         $router = $this->container['router'];
         return $router->url($handler, $data, $query_params, $is_absolute);
@@ -50,7 +50,7 @@ class DietcubeExtension extends AbstractExtension
      * @param array $query_params
      * @return string url
      */
-    public function absoluteUrl($handler, array $data = [], array $query_params = [])
+    public function absoluteUrl(string $handler, array $data = [], array $query_params = []): string
     {
         return $this->url($handler, $data, $query_params, true);
     }
