@@ -38,32 +38,29 @@ class RouterTest extends TestCase
         $this->assertSame([\FastRoute\Dispatcher::NOT_FOUND], $route_info);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testDispatchIsNotInitialized()
     {
         $router = static::createRouterWithoutInit();
 
+        $this->expectException(\RuntimeException::class);
+
         $router->dispatch('GET', '/about');
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testNotExistHandler()
     {
         $router = static::createRouter();
 
+        $this->expectException(\RuntimeException::class);
+
         $router->url('Page::notExistsHandler');
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testNotExistSegumentName()
     {
         $router = static::createRouter();
+
+        $this->expectException(\InvalidArgumentException::class);
 
         $router->url('User::detail', ['invalid_key_name' => 12345]);
     }
