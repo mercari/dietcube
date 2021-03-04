@@ -9,6 +9,11 @@ trait ArrayResourceGetterTrait
 {
     protected $_array_resource = [];
 
+    /**
+     * @param null $key
+     * @param null $default
+     * @return array|mixed|null
+     */
     public function getResource($key = null, $default = null)
     {
         if ($key === null) {
@@ -17,23 +22,25 @@ trait ArrayResourceGetterTrait
 
         $key_parts = explode('.', $key);
         $value = $this->_array_resource;
-        foreach ($key_parts as $key) {
+        foreach ($key_parts as $key_part) {
             if (!is_array($value)) {
                 return $default;
-            } elseif (!array_key_exists($key, $value)) {
+            }
+
+            if (!array_key_exists($key_part, $value)) {
                 return $default;
             }
-            $value = $value[$key];
+            $value = $value[$key_part];
         }
         return $value;
     }
 
-    public function getResourceData()
+    public function getResourceData(): array
     {
         return $this->_array_resource;
     }
 
-    public function clearResource()
+    public function clearResource(): void
     {
         $this->_array_resource = [];
     }
