@@ -1,14 +1,11 @@
 <?php
-/**
- *
- */
 
 namespace Dietcube\Events;
 
 use Dietcube\Application;
 use Symfony\Component\EventDispatcher\Event;
 
-class DietcubeEventAbstract extends Event
+abstract class DietcubeEventAbstract extends Event
 {
     /**
      * @var Application
@@ -18,7 +15,7 @@ class DietcubeEventAbstract extends Event
     /**
      * @return Application
      */
-    public function getApplication()
+    public function getApplication(): Application
     {
         return $this->app;
     }

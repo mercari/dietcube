@@ -10,12 +10,15 @@ use Dietcube\Response;
 
 class ExecuteActionEvent extends DietcubeEventAbstract
 {
+    /** @var callable  */
     protected $executable;
+    /** @var array */
     protected $vars = [];
 
+    /** @var string */
     protected $result = "";
 
-    public function __construct(Application $app, $executable, array $vars)
+    public function __construct(Application $app, callable $executable, array $vars)
     {
         $this->app = $app;
         $this->executable = $executable;
@@ -23,17 +26,10 @@ class ExecuteActionEvent extends DietcubeEventAbstract
     }
 
     /**
-     * @return Application
-     */
-    public function getApplication()
-    {
-        return $this->app;
-    }
-
-    /**
      * @param callable $executable
+     * @return ExecuteActionEvent
      */
-    public function setExecutable($executable)
+    public function setExecutable(callable $executable): self
     {
         if (!is_callable($executable)) {
             throw new \InvalidArgumentException("Passed argument for setExecutable is not callable.");
@@ -49,10 +45,11 @@ class ExecuteActionEvent extends DietcubeEventAbstract
      * e.g. User::login
      *
      * @param string $handler
+     * @return ExecuteActionEvent
      */
-    public function setExecutableByHandler($handler)
+    public function setExecutableByHandler(string $handler): self
     {
-        list($controller_name, $action_name) = $this->app->getControllerByHandler($handler);
+        [$controller_name, $action_name] = $this->app->getControllerByHandler($handler);
         $controller = $this->app->createController($controller_name);
 
         $this->setExecutable([$controller, $action_name]);
@@ -63,15 +60,16 @@ class ExecuteActionEvent extends DietcubeEventAbstract
     /**
      * @return callable executable
      */
-    public function getExecutable()
+    public function getExecutable(): callable
     {
         return $this->executable;
     }
 
     /**
      * @param array $vars
+     * @return ExecuteActionEvent
      */
-    public function setVars(array $vars)
+    public function setVars(array $vars): self
     {
         $this->vars = $vars;
 
@@ -81,15 +79,16 @@ class ExecuteActionEvent extends DietcubeEventAbstract
     /**
      * @return array
      */
-    public function getVars()
+    public function getVars(): array
     {
         return $this->vars;
     }
 
     /**
      * @param string $result
+     * @return ExecuteActionEvent
      */
-    public function setResult($result)
+    public function setResult(string $result): self
     {
         $this->result = $result;
 
@@ -99,7 +98,7 @@ class ExecuteActionEvent extends DietcubeEventAbstract
     /**
      * @return string
      */
-    public function getResult()
+    public function getResult(): string
     {
         return $this->result;
     }

@@ -7,9 +7,11 @@ namespace Dietcube\Events;
 
 use Dietcube\Application;
 use Dietcube\Router;
+use phpDocumentor\Reflection\DocBlock\Tags\Deprecated;
 
 class RoutingEvent extends DietcubeEventAbstract
 {
+    /** @var Router  */
     protected $router;
 
     protected $handler;
@@ -21,45 +23,56 @@ class RoutingEvent extends DietcubeEventAbstract
         $this->router = $router;
     }
 
-    public function getRouter()
+    public function getRouter(): Router
     {
         return $this->router;
     }
 
-    public function setRouter(Router $router)
+    public function setRouter(Router $router): self
     {
         $this->router = $router;
+        return $this;
     }
 
-    public function setHandler($handler)
+    public function setHandler($handler): self
     {
         $this->handler = $handler;
 
         return $this;
     }
 
-    public function getHandler($handler)
+    /**
+     * @param mixed $_handler Deprecated.
+     * @return mixed
+     */
+    public function getHandler($_handler = null)
     {
         return $this->handler;
     }
 
-    public function setVars(array $vars)
+    public function setVars(array $vars): self
     {
         $this->vars = $vars;
+        return $this;
     }
 
-    public function getVars(array $vars)
+    /**
+     * @param array $_vars Deprecated.
+     * @return array
+     */
+    public function getVars(array $_vars = []): array
     {
         return $this->vars;
     }
 
-    public function setRouteInfo($handler, array $vars = [])
+    public function setRouteInfo($handler, array $vars = []): self
     {
         $this->handler = $handler;
         $this->vars = $vars;
+        return $this;
     }
 
-    public function getRouteInfo()
+    public function getRouteInfo(): array
     {
         return [$this->handler, $this->vars];
     }

@@ -24,16 +24,18 @@ class FinishRequestEvent extends DietcubeEventAbstract
     /**
      * @return Response
      */
-    public function getResponse()
+    public function getResponse(): Response
     {
         return $this->response;
     }
 
     /**
      * @param Response $response
+     * @return FinishRequestEvent
      */
-    public function setResponse(Response $response)
+    public function setResponse(Response $response): self
     {
         $this->response = $response;
+        return $this;
     }
 }
