@@ -13,8 +13,11 @@ class Response
 {
     use LoggerAwareTrait;
 
-    /** @const array Map of standard HTTP status code/reason phrases */
-    const PHRASES = [
+    /**
+     * @var array<int, string>
+     * @const array Map of standard HTTP status code/reason phrases
+     */
+    public const PHRASES = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
@@ -82,7 +85,7 @@ class Response
     protected $status_code = 200;
 
     /** @var null|string */
-    protected $body = null;
+    protected $body;
 
     protected $headers = [];
 
@@ -98,9 +101,10 @@ class Response
     }
 
     /**
+     * @param int|string $status_code
      * @return $this
      */
-    public function setStatusCode($status_code)
+    public function setStatusCode($status_code): self
     {
         if (null === self::PHRASES[$this->status_code]) {
             throw new \InvalidArgumentException("Invalid status code '{$this->status_code}'");
@@ -115,7 +119,7 @@ class Response
     /**
      * @return int
      */
-    public function getStatusCode()
+    public function getStatusCode(): int
     {
         return $this->status_code;
     }
@@ -123,7 +127,7 @@ class Response
     /**
      * @return $this
      */
-    public function setBody($body)
+    public function setBody($body): self
     {
         $this->body = $body;
 
@@ -131,9 +135,10 @@ class Response
     }
 
     /**
-     * @return $this
+     * @return mixed $this
+     * @throws \InvalidArgumentException
      */
-    public function setReasonPhrase($phrase = null)
+    public function setReasonPhrase($phrase = null): self
     {
         if ($phrase !== null) {
             $this->reason_phrase = $phrase;
@@ -151,7 +156,7 @@ class Response
     /**
      * @return string
      */
-    public function getReasonPhrase()
+    public function getReasonPhrase(): ?string
     {
         return $this->reason_phrase;
     }
@@ -159,19 +164,19 @@ class Response
     /**
      * @return string|null
      */
-    public function getBody()
+    public function getBody(): ?string
     {
         return $this->body;
     }
 
-    public function sendBody()
+    public function sendBody(): void
     {
         if ($this->body !== null) {
             echo $this->body;
         }
     }
 
-    public function sendHeaders()
+    public function sendHeaders(): self
     {
         if (headers_sent()) {
             $this->logger || $this->logger->error('Header already sent.');
@@ -185,15 +190,16 @@ class Response
         }
     }
 
-    public function sendHttpHeader()
+    public function sendHttpHeader(): void
     {
         header("HTTP/{$this->version} {$this->status_code} {$this->reason_phrase}", true);
     }
 
     /**
+     * @param array $headers
      * @return $this
      */
-    public function setHeaders(array $headers)
+    public function setHeaders(array $headers): self
     {
         foreach ($headers as $header => $value) {
             $this->setHeader($header, $value);
@@ -203,9 +209,11 @@ class Response
     }
 
     /**
+     * @param $header
+     * @param $value
      * @return $this
      */
-    public function setHeader($header, $value)
+    public function setHeader($header, $value): self
     {
         $header = trim($header);
         if (!is_array($value)) {
