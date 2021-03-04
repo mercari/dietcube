@@ -9,8 +9,27 @@
         </testsuite>
     </testsuites>
     <logging>
+        <!-- Remove <log> elements when PHP unit bumped 9.X -->
+        <log type="junit" target="build/junit/junit.xml" />
+        <log type="coverage-html" target="build/coverage/html/" />
+        <log type="coverage-clover" target="build/coverage/clover.xml" />
+        <!-- For PHP unit 9.X --> <!--
         <junit outputFile="build/junit/junit.xml"/>
+        -->
     </logging>
+    <!-- Remove <filter> element when PHP unit bumped 9.X -->
+    <filter>
+        <whitelist
+                addUncoveredFilesFromWhitelist="true"
+                processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./src</directory>
+            <exclude>
+                <directory suffix=".php">./tests</directory>
+                <directory suffix=".twig">./src/template</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+    <!-- For PHP unit 9.X --> <!--
     <coverage
             includeUncoveredFiles="true"
             processUncoveredFiles="true"
@@ -27,4 +46,5 @@
             <directory suffix=".twig">./src/template</directory>
         </exclude>
     </coverage>
+    -->
 </phpunit>
