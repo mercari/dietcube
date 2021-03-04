@@ -64,7 +64,7 @@ abstract class Application
                 continue;
             }
 
-            $config = array_merge($config, require $load_config_file);
+            $config[] = array_merge($config, require $load_config_file);
         }
 
         $this->config = new Config($config);

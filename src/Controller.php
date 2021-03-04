@@ -71,7 +71,7 @@ class Controller
     {
         $template = $this->findTemplate($name);
 
-        return $this->get('app.renderer')->render($template, array_merge($this->view_vars, $vars));
+        return $this->get('app.renderer')->render($template, array_merge($this->view_vars ?: [], $vars));
     }
 
     protected function redirect($uri, $code = 302)

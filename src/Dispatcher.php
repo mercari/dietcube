@@ -20,6 +20,9 @@ use FastRoute\Dispatcher as RouteDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Monolog\Logger;
+use Twig\Environment;
+use Twig\Extension\DebugExtension;
+use Twig\Loader\FilesystemLoader;
 
 class Dispatcher
 {
@@ -87,8 +90,8 @@ class Dispatcher
     protected function createRenderer()
     {
         $config = $this->container['app.config'];
-        $loader = new \Twig_Loader_Filesystem($this->app->getTemplateDir());
-        $twig = new \Twig_Environment($loader, [
+        $loader = new FilesystemLoader($this->app->getTemplateDir());
+        $twig = new Environment($loader, [
             'debug' => $config->get('debug', false),
             'cache' => $config->get('twig.cache', false),
             'charset' => $config->get('twig.charset', 'utf-8'),
@@ -102,7 +105,7 @@ class Dispatcher
 
         if ($this->app->isDebug()) {
             // add built-in debug template path
-            $twig->addExtension(new \Twig_Extension_Debug());
+            $twig->addExtension(new DebugExtension());
             $loader->addPath(__DIR__ . '/template/debug', 'debug');
         }
 

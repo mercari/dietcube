@@ -7,8 +7,10 @@ namespace Dietcube\Twig;
 
 use Dietcube\Components\ContainerAwareTrait;
 use Pimple\Container;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
 
-class DietcubeExtension extends \Twig_Extension
+class DietcubeExtension extends AbstractExtension
 {
     use ContainerAwareTrait;
 
@@ -20,8 +22,8 @@ class DietcubeExtension extends \Twig_Extension
     public function getFunctions()
     {
         return [
-            new \Twig_SimpleFunction('url', [$this, 'url']),
-            new \Twig_SimpleFunction('absolute_url', [$this, 'absoluteUrl']),
+            new TwigFunction('url', [$this, 'url']),
+            new TwigFunction('absolute_url', [$this, 'absoluteUrl']),
         ];
     }
 
