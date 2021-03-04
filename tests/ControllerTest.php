@@ -5,7 +5,6 @@
 
 namespace Dietcube;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 use Twig\Environment;
