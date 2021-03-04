@@ -17,19 +17,32 @@ abstract class Application
 {
     use ContainerAwareTrait;
 
+    /**
+     * @var string
+     */
     protected $app_root;
 
+    /**
+     * @var string
+     */
     protected $app_namespace;
 
+    /**
+     * @var string
+     */
     protected $env;
 
+    /**
+     * @var bool
+     */
     protected $debug = false;
 
     /**
-     * @var Config
+     * @var Config|null
      */
     protected $config = null;
 
+    /** @var array|string[]  */
     protected $dirs = [];
 
     protected $host;
@@ -38,7 +51,12 @@ abstract class Application
     protected $path;
     protected $url;
 
-    public function __construct($app_root, $env)
+    /**
+     * Application constructor.
+     * @param string $app_root
+     * @param string $env
+     */
+    public function __construct(string $app_root, string $env)
     {
         $this->app_root = $app_root;
         $this->app_namespace = $this->detectAppNamespace();
@@ -47,15 +65,12 @@ abstract class Application
         $this->dirs = $this->getDefaultDirs();
     }
 
-    /**
-     * @return Container
-     */
-    public function getContainer()
+    public function getContainer(): ?Container
     {
         return $this->container;
     }
 
-    public function loadConfig()
+    public function loadConfig(): void
     {
         $config = [];
         foreach ($this->getConfigFiles() as $config_file) {
@@ -71,14 +86,19 @@ abstract class Application
         $this->bootConfig();
     }
 
-    public function initHttpRequest(Container $container)
+    public function initHttpRequest(Container $container): void
     {
         $server = $container['global.server']->get();
         $this->host = $server['HTTP_HOST'];
         $this->port = $server['SERVER_PORT'];
-        $this->protocol = (($this->port == '443' || (isset($server['X_FORWARDED_PROTO']) && $server['X_FORWARDED_PROTO'] == 'https')) ? 'https' : 'http');
+        $this->protocol = (($this->isHTTPS() || (isset($server['X_FORWARDED_PROTO']) && $server['X_FORWARDED_PROTO'] == 'https')) ? 'https' : 'http');
         $this->path = parse_url($server['REQUEST_URI'])['path'];
         $this->url = $this->protocol . '://' . $this->host;
+    }
+
+    protected function isHTTPS(): bool
+    {
+        return (int)$this->getPort() === 443;
     }
 
     public function init(Container $container)
@@ -87,20 +107,17 @@ abstract class Application
 
     abstract public function config(Container $container);
 
-    /**
-     * @return string
-     */
-    public function getEnv()
+    public function getEnv(): string
     {
         return $this->env;
     }
 
-    public function getAppRoot()
+    public function getAppRoot(): string
     {
         return $this->app_root;
     }
 
-    public function getAppNamespace()
+    public function getAppNamespace(): string
     {
         return $this->app_namespace;
     }
@@ -111,85 +128,97 @@ abstract class Application
         return new $route_class;
     }
 
-    /**
-     * @return Config
-     */
-    public function getConfig()
+    public function getConfig(): ?Config
     {
         return $this->config;
     }
 
-    public function setDir($dirname, $path)
+    public function setDir($dirname, $path): void
     {
         $this->dirs[$dirname] = $path;
     }
 
+    /**
+     * @return mixed
+     */
     public function getHost()
     {
         return $this->host;
     }
 
+    /**
+     * @return mixed
+     */
     public function getProtocol()
     {
         return $this->protocol;
     }
 
+    /**
+     * @return mixed
+     */
     public function getPort()
     {
         return $this->port;
     }
 
+    /**
+     * @return mixed
+     */
     public function getPath()
     {
         return $this->path;
     }
 
+    /**
+     * @return mixed
+     */
     public function getUrl()
     {
         return $this->url;
     }
 
-    public function getWebrootDir()
+    public function getWebrootDir(): string
     {
         return $this->dirs['webroot'];
     }
 
-    public function getResourceDir()
+    public function getResourceDir(): string
     {
         return $this->dirs['resource'];
     }
 
-    public function getTemplateDir()
+    public function getTemplateDir(): string
     {
         return $this->dirs['template'];
     }
 
-    public function getTemplateExt()
+    public function getTemplateExt(): string
     {
         return '.html.twig';
     }
 
-    public function getConfigDir()
+    public function getConfigDir(): string
     {
         return $this->dirs['config'];
     }
 
-    public function getTmpDir()
+    public function getTmpDir(): string
     {
         return $this->dirs['tmp'];
     }
 
-    public function getVendorDir()
+    public function getVendorDir(): string
     {
         return $this->dirs['vendor'];
     }
 
-    public function isDebug()
+    public function isDebug(): bool
     {
         return $this->debug;
     }
 
-    public function getConfigFiles()
+    public function getConfigFiles(): array
     {
         return [
             'config.php',
@@ -197,10 +226,13 @@ abstract class Application
         ];
     }
 
-    public function getControllerByHandler($handler)
+    /**
+     * @param string $handler
+     * @return array
+     */
+    public function getControllerByHandler(string $handler): array
     {
-        // @TODO check
-        list($controller, $action_name) = explode('::', $handler, 2);
+        [$controller, $action_name] = explode('::', $handler, 2);
         if (!$controller || !$action_name) {
             throw new DCException('Error: handler error');
         }
@@ -213,7 +245,11 @@ abstract class Application
         return [$controller_name, $action_name];
     }
 
-    public function createController($controller_name)
+    /**
+     * @param string $controller_name
+     * @return mixed
+     */
+    public function createController(string $controller_name)
     {
         $controller = new $controller_name($this->container);
         $controller->setVars('env', $this->getEnv());
@@ -222,7 +258,10 @@ abstract class Application
         return $controller;
     }
 
-    protected function getDefaultDirs()
+    /**
+     * @return string[]
+     */
+    protected function getDefaultDirs(): array
     {
         return [
             'controller' => $this->app_root . '/Controller',
@@ -236,18 +275,18 @@ abstract class Application
         ];
     }
 
-    protected function bootConfig()
+    protected function bootConfig(): void
     {
         $this->debug = $this->config->get('debug', false);
     }
 
-    protected function detectAppNamespace()
+    protected function detectAppNamespace(): string
     {
         $ref = new \ReflectionObject($this);
         return $ref->getNamespaceName();
     }
 
-    public function createLogger($path, $level = Logger::WARNING)
+    public function createLogger($path, $level = Logger::WARNING): Logger
     {
         $logger = new Logger('app');
         $logger->pushProcessor(new PsrLogMessageProcessor);
