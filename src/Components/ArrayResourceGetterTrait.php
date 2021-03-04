@@ -1,12 +1,10 @@
 <?php
-/**
- *
- */
 
 namespace Dietcube\Components;
 
 trait ArrayResourceGetterTrait
 {
+    /** @var array */
     protected $_array_resource = [];
 
     /**

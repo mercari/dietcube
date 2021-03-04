@@ -1,7 +1,4 @@
 <?php
-/**
- *
- */
 
 namespace Dietcube\Components;
 
@@ -10,9 +7,9 @@ use Pimple\Container;
 trait ContainerAwareTrait
 {
     /**
-     * @var Container
+     * @var Container|null
      */
-    protected $container = null;
+    protected $container;
 
     /**
      * @param Container $container

@@ -1,7 +1,4 @@
 <?php
-/**
- *
- */
 
 namespace Dietcube\Components;
 
@@ -9,9 +6,10 @@ use Psr\Log\LoggerInterface;
 
 trait LoggerAwareTrait
 {
-    protected $logger = null;
+    /** @var LoggerInterface|null */
+    protected $logger;
 
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(LoggerInterface $logger): void
     {
         $this->logger = $logger;
     }
