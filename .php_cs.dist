@@ -8,7 +8,6 @@ return PhpCsFixer\Config::create()
     ->setRules([
         '@PSR2' => true,
         'array_syntax' => ['syntax' => 'short'],
-        '@PHP74Migration' => true,
     ])
     ->setFinder($finder)
 ;
