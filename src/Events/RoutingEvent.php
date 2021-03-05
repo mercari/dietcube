@@ -7,7 +7,6 @@ namespace Dietcube\Events;
 
 use Dietcube\Application;
 use Dietcube\Router;
-use phpDocumentor\Reflection\DocBlock\Tags\Deprecated;
 
 class RoutingEvent extends DietcubeEventAbstract
 {
