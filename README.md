@@ -44,7 +44,7 @@ https://www.mercari.com/cla/
 License
 ---------
 
-See LICESNSE file.
+See [LICENSE](LICENSE) file.
 
 Authors
 ---------
