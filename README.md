@@ -1,4 +1,12 @@
-Dietcube
+[ARCHIVED] Dietcube
+----------
+# Archived
+This repository won't be maintenanced.
+This Repository is only left for Packagist and references from existing projects.
+Please use the modern library instead by.
+
+Thank you for everything.
+
 =========
 
 Dietcube is the world super fly weight & flexible PHP framework.
