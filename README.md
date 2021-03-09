@@ -1,11 +1,11 @@
 [ARCHIVED] Dietcube
 ----------
 # Archived
-This repository won't be maintenanced.
-This Repository is only left for Packagist and references from existing projects.
-Please use the modern library instead by.
 
-Thank you for everything.
+This repository is no longer maintained and now is read-only.
+Please consider migrating to other modern frameworks.
+
+Thank you all for your contributions.
 
 =========
 
